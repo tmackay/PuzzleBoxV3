@@ -27,7 +27,7 @@ cube_w = cube_w_*scl;
 planets = 5; //[3:1:21]
 
 // Height of planetary layers (layer_h will be subtracted from gears>0). Non-uniform heights will reveal bugs.
-gh_ = [7.0, 7.2, 7.2, 7.2, 7.2, 7.2];
+gh_ = 6.8*[1, 1, 1, 1, 1, 1];
 gh = scl*gh_;
 // Modules, planetary layers
 modules = len(gh); //[2:1:3]
@@ -213,6 +213,7 @@ module lament(){
 }
 
 module lamenthalf(turns=false){
+    ld=7.3;
     difference(){
         union(){
             // top ledge
@@ -224,23 +225,44 @@ module lamenthalf(turns=false){
 // cylinder with recess for locking teeth
 difference(){
     translate([0,0,-cube_w/2])
-        cylinder(d=outer_d,h=core_h2-layer_h,$fn=96);
+        difference(){
+            cylinder(d=outer_d,h=core_h2-layer_h,$fn=96);
+            // centre hole
+            translate([0,0,-TT])cylinder(d=10*scl,h=core_h2-layer_h+AT,$fn=96);
+        }
+    // slots for latch movement
     intersection(){
         translate([0,0,-cube_w/2])
-            cylinder(d=outer_d+tol,h=core_h2-layer_h-1*scl+2*tol,$fn=96);
-        translate([0,0,core_h2-layer_h-5*scl-cube_w/2]){
+            cylinder(d=outer_d+tol,h=core_h2-layer_h-2*scl+2*tol,$fn=96);
+        translate([0,0,core_h2-layer_h-6*scl-cube_w/2]){
             r=(outer_d+outer_w/sqrt(2))/2+2*tol;
             r1=outer_d/2;
             e=r1-sqrt(r1*r1-pow(1.5*scl+2*tol,2));
             h=core_h+core_h2-2*scl-cube_w/2;
             d=cube_w/2-r1-2*scl;
             dz=d/sqrt(3);
-            // outer teeth
-            for(j=[1:8])
-                rotate(j*360/8+45/4)translate([r1-4*scl-e,0,0])
-                    mirror([0,1,1])cylinder(r=core_h2-layer_h-6.2*scl+2*tol,h=3*scl+4*tol,center=true);
+            for(j=[1:8])rotate(j*360/8+45/4)translate([r1-4*scl-e,0,0])mirror([0,1,1])
+                cylinder(r=core_h2-layer_h-ld*scl+2*tol,h=3*scl+4*tol,center=true);
         }
     }
+    // holes for magnet insertion
+    difference(){
+        for(j=[1:8])hull()mir()translate([0,0,core_h2-layer_h-6*scl-cube_w/2]){
+            r=(outer_d+outer_w/sqrt(2))/2+2*tol;
+            r1=outer_d/2;
+            e=r1-sqrt(r1*r1-pow(1.5*scl+2*tol,2));
+            h=core_h+core_h2-2*scl-cube_w/2;
+            d=cube_w/2-r1-2*scl;
+            dz=d/sqrt(3);
+            rotate(j*360/8+45/4)translate([r1-4*scl-e,0,0])mirror([0,1,1])
+                rotate(115)translate([0,core_h2-layer_h-ld*scl-3*scl-5*tol,0])
+                    cylinder(r=3*scl+tol,h=3*scl+4*tol,center=true,$fn=24);
+        }
+        // supporting layer
+        //translate([0,0,core_h2-9*layer_h-cube_w/2])cylinder(d=outer_d,h=layer_h,$fn=96);
+    }
+    //temporary secton
+    //rotate(45/4)translate([0,-cube_w/2,0])cube(cube_w+AT,center=true);
 }
 
             //translate([0,0,-cube_w/2])
@@ -254,9 +276,11 @@ difference(){
                         rotate([0,0,(i-1)*360/16])
                             translate([-cube_w/2-tol,cube_w/2,0])cube(cube_w,center=true);
                     }
-                    difference(){ // TODO: flatten positive and negative volumes
-                        translate([0,0,core_h2-tol-cube_w/2])
-                            cylinder(d=outer_d+4*tol,h=cube_w-core_h2+tol+AT);
+                    //difference(){ // TODO: flatten positive and negative volumes
+                    translate([0,0,core_h2-tol-cube_w/2])
+                        cylinder(d=outer_d+4*tol,h=cube_w-core_h2+tol+AT);
+                    translate([0,0,-AT-cube_w/2])
+                        cylinder(d=outer_d-AT,h=core_h2);
                         // turning teeth
                         /*if(turns)for(i=[modules/2-1:modules/2-1])translate([0,0,addl(gh,i)-cube_w/2+core_h2+(i>0&&i<modules/2?layer_h:0)]){
                             r=(outer_d+outer_w/sqrt(2))/2+2*tol;
@@ -269,7 +293,7 @@ difference(){
                                 rotate_extrude()
                                     polygon(points=[[r1+AT,0],[r1,0],[r1-d,dz],[r1-d,h-dz],[r1,h],[r1+AT,h]]);
                         }*/
-                    }
+                    //}
                 }
             }
             
@@ -404,34 +428,51 @@ difference(){
 // locking teeth
 r1=outer_d/2;
 e=r1-sqrt(r1*r1-pow(1.5*scl+2*tol,2));
+la=0;
 for(j=[1:8])
-translate([0,0,core_h2-layer_h-5*scl-cube_w/2])rotate(j*360/8+45/4)translate([r1-4*scl-e,0,0])
-rotate([0,-90,0])
-translate(-[r1-4*scl-e,0,0])rotate(-j*360/8-45/4)translate(-[0,0,core_h2-layer_h-5*scl-cube_w/2])
+translate([0,0,core_h2-layer_h-6*scl-cube_w/2])rotate(j*360/8+45/4)translate([r1-4*scl-e,0,0])
+rotate([0,-la,0])
+translate(-[r1-4*scl-e,0,0])rotate(-j*360/8-45/4)translate(-[0,0,core_h2-layer_h-6*scl-cube_w/2])
 intersection(){
     translate([0,0,-cube_w/2])rotate_extrude(){
-        translate([r1-4*scl,core_h2-layer_h-5*scl])circle(r=4*scl);
+        translate([r1-4*scl,core_h2-layer_h-6*scl])circle(r=4*scl);
         difference(){
-            square([r1,core_h2-layer_h-1*scl]);
-            translate([r1-4*scl,core_h2-layer_h-5*scl])square([4*scl,4*scl]);
+            square([r1,core_h2-layer_h-2*scl]);
+            translate([r1-4*scl,core_h2-layer_h-6*scl])square([4*scl,4*scl]);
         }
     }
-    translate([0,0,core_h2-layer_h-5*scl-cube_w/2]){
+    translate([0,0,core_h2-layer_h-6*scl-cube_w/2]){
         r=(outer_d+outer_w/sqrt(2))/2+2*tol;
-        
         h=core_h+core_h2-2*scl-cube_w/2;
         d=cube_w/2-r1-2*scl;
-        dz=d/sqrt(3);
-        
+        dz=d/sqrt(3);        
         // outer teeth
         rotate(j*360/8+45/4)translate([r1-4*scl-e,0,0])mirror([0,1,1]){
             difference(){
-                cylinder(r=core_h2-layer_h-6.2*scl,h=3*scl,center=true);
+                cylinder(r=core_h2-layer_h-ld*scl,h=3*scl,center=true);
                 cylinder(r=2*scl+2*tol,h=3*scl+4*tol,center=true);
+                // hole for magnet
+                rotate(115)translate([0,core_h2-layer_h-ld*scl-3*scl-5*tol,0])
+                    cylinder(r=3*scl+tol/2,h=3*scl+AT,center=true);
             }
             cylinder(r=2*scl,h=3*scl+4*tol+2*AT,center=true);
             // bridge helpers
-            rotate(90)translate([0,core_h2-layer_h-6.2*scl-tol/2,0])cube([14*tol,tol,3*scl+4*tol+2*AT],center=true);
+            intersection(){
+                difference(){
+                    cylinder(r=core_h2-layer_h-ld*scl,h=3*scl+4*tol+AT,center=true);
+                    cylinder(r=core_h2-layer_h-ld*scl-layer_h,h=3*scl+4*tol+ST,center=true);
+                }
+                mirror([0,1,1])translate(-[r1-4*scl-e,0,0])rotate(-j*360/8-45/4)
+                translate(-[0,0,core_h2-layer_h-5*scl-cube_w/2])
+                translate([0,0,core_h2-layer_h-5*scl-cube_w/2])rotate(j*360/8+45/4)translate([r1-4*scl-e,0,0])
+                rotate([0,la,0])
+                translate(-[r1-4*scl-e,0,0])rotate(-j*360/8-45/4)translate(-[0,0,core_h2-layer_h-5*scl-cube_w/2])
+                    translate([0,0,-cube_w/2])difference(){
+                        cylinder(d=outer_d,h=core_h2-layer_h,$fn=96);
+                        cylinder(d=outer_d-20*scl,h=core_h2-layer_h,$fn=96);
+                    }
+            }
+            
         }
     }
 }
