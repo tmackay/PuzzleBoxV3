@@ -89,7 +89,7 @@ difference(){
             dz=d/sqrt(3);
             rotate(j*360/8+45/4)translate([r1-4*scl-e,0,0])mirror([0,1,1])
                 rotate(90)translate([0,core_h2-layer_h-ld*scl-3*scl-5*tol,-3*scl-2*tol])
-                    cylinder(r=3*scl+2*tol,h=3*scl+4*tol,center=true);
+                    cylinder(r=3*scl+tol,h=3*scl+4*tol,center=true);
         }
         // supporting layer
         translate([0,0,core_h2-9*layer_h-cube_w/2])cylinder(d=outer_d,h=layer_h,$fn=96);
@@ -125,7 +125,8 @@ intersection(){
                 cylinder(r=core_h2-layer_h-ld*scl,h=3*scl,center=true);
                 cylinder(r=2*scl+2*tol,h=3*scl+4*tol,center=true);
                 // hole for magnet
-                rotate(90)translate([0,core_h2-layer_h-ld*scl-3*scl-5*tol,0])cylinder(r=3*scl+tol,h=3*scl+AT,center=true);
+                rotate(90)translate([0,core_h2-layer_h-ld*scl-3*scl-5*tol,0])
+                    cylinder(r=3*scl+tol/2,h=3*scl+AT,center=true);
             }
             cylinder(r=2*scl,h=3*scl+4*tol+2*AT,center=true);
             // bridge helpers
