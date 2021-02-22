@@ -27,7 +27,7 @@ cube_w = cube_w_*scl;
 planets = 5; //[3:1:21]
 
 // Height of planetary layers (layer_h will be subtracted from gears>0). Non-uniform heights will reveal bugs.
-gh_ = [7.2, 7.4, 7.4, 7.4, 7.4, 7.4];
+gh_ = [7.0, 7.2, 7.2, 7.2, 7.2, 7.2];
 gh = scl*gh_;
 // Modules, planetary layers
 modules = len(gh); //[2:1:3]
@@ -221,8 +221,30 @@ module lamenthalf(turns=false){
             //translate([0,0,-cube_w/2])
                 //cylinder(r=outer_d/2+teeth_a*outer_w, h=1*scl+AT);
 
-            translate([0,0,-cube_w/2])
-                cylinder(d=outer_d,h=core_h2-tol,$fn=96);
+// cylinder with recess for locking teeth
+difference(){
+    translate([0,0,-cube_w/2])
+        cylinder(d=outer_d,h=core_h2-layer_h,$fn=96);
+    intersection(){
+        translate([0,0,-cube_w/2])
+            cylinder(d=outer_d+tol,h=core_h2-layer_h-1*scl+2*tol,$fn=96);
+        translate([0,0,core_h2-layer_h-5*scl-cube_w/2]){
+            r=(outer_d+outer_w/sqrt(2))/2+2*tol;
+            r1=outer_d/2;
+            e=r1-sqrt(r1*r1-pow(1.5*scl+2*tol,2));
+            h=core_h+core_h2-2*scl-cube_w/2;
+            d=cube_w/2-r1-2*scl;
+            dz=d/sqrt(3);
+            // outer teeth
+            for(j=[1:8])
+                rotate(j*360/8+45/4)translate([r1-4*scl-e,0,0])
+                    mirror([0,1,1])cylinder(r=core_h2-layer_h-6.2*scl+2*tol,h=3*scl+4*tol,center=true);
+        }
+    }
+}
+
+            //translate([0,0,-cube_w/2])
+                //cylinder(d=outer_d,h=core_h2-tol,$fn=96);
             for (i=[0:2:15]){
                 difference(){
                     intersection(){
@@ -360,7 +382,7 @@ module lamenthalf(turns=false){
         //translate(-cube_w*[1,0,1])cube(2*cube_w);
     }
                 // locking teeth
-            translate([0,0,2*scl-cube_w/2])intersection(){
+            /*translate([0,0,2*scl-cube_w/2])intersection(){
                 r=(outer_d+outer_w/sqrt(2))/2+2*tol;
                 r1=outer_d/2;
                 h=core_h+core_h2-2*scl-cube_w/2;
@@ -377,7 +399,42 @@ module lamenthalf(turns=false){
                             //translate([0,2*scl+2*tol,0])cube([4*r1+d+AT,r1+d+AT,h]);
                     }
                 }
+            }*/
+    
+// locking teeth
+r1=outer_d/2;
+e=r1-sqrt(r1*r1-pow(1.5*scl+2*tol,2));
+for(j=[1:8])
+translate([0,0,core_h2-layer_h-5*scl-cube_w/2])rotate(j*360/8+45/4)translate([r1-4*scl-e,0,0])
+rotate([0,-90,0])
+translate(-[r1-4*scl-e,0,0])rotate(-j*360/8-45/4)translate(-[0,0,core_h2-layer_h-5*scl-cube_w/2])
+intersection(){
+    translate([0,0,-cube_w/2])rotate_extrude(){
+        translate([r1-4*scl,core_h2-layer_h-5*scl])circle(r=4*scl);
+        difference(){
+            square([r1,core_h2-layer_h-1*scl]);
+            translate([r1-4*scl,core_h2-layer_h-5*scl])square([4*scl,4*scl]);
+        }
+    }
+    translate([0,0,core_h2-layer_h-5*scl-cube_w/2]){
+        r=(outer_d+outer_w/sqrt(2))/2+2*tol;
+        
+        h=core_h+core_h2-2*scl-cube_w/2;
+        d=cube_w/2-r1-2*scl;
+        dz=d/sqrt(3);
+        
+        // outer teeth
+        rotate(j*360/8+45/4)translate([r1-4*scl-e,0,0])mirror([0,1,1]){
+            difference(){
+                cylinder(r=core_h2-layer_h-6.2*scl,h=3*scl,center=true);
+                cylinder(r=2*scl+2*tol,h=3*scl+4*tol,center=true);
             }
+            cylinder(r=2*scl,h=3*scl+4*tol+2*AT,center=true);
+            // bridge helpers
+            rotate(90)translate([0,core_h2-layer_h-6.2*scl-tol/2,0])cube([14*tol,tol,3*scl+4*tol+2*AT],center=true);
+        }
+    }
+}
             
             //rotate(90-360/16+360/8+45/2)
                 //translate([0,2*scl+2*tol,-cube_w/2])cube([cube_w,3*scl,core_h2-layer_h]);
@@ -396,7 +453,7 @@ if(true||g==1||g==undef&&part=="core")translate([0,0,core_h2-cube_w/2]){
                 r=(outer_d+outer_w/sqrt(2))/2+2*tol;
                 r1=outer_d/2;
                 h=core_h+core_h2-2*scl-cube_w/2;
-                d=cube_w/2-r1-2*scl;
+                d=cube_w/2-r1-2*scl-2*tol;
                 dz=d/sqrt(3);
                 rotate_extrude()
                     polygon(points=[[r1-d-AT,0],[r1,0],[r1+d,dz],[r1+d,h-dz],[r1,h],[r1-d-AT,h]]);
