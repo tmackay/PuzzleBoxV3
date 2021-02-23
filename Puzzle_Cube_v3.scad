@@ -1,9 +1,7 @@
 // OpenSCAD Puzzle Cube
-// (c) 2020, tmackay
+// (c) 2021, tmackay
 //
 // Licensed under a Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0) license, http://creativecommons.org/licenses/by-sa/4.0.
-
-//include <SCCPv1.scad> // see https://github.com/tmackay/solid-core-compound-planet
 
 // Which one would you like to see?
 part = "lower"; // [box:Box,lower:Lower Half,upper:Upper Half,core:Core,tool:Key Tool,joiner:Joiner]
@@ -188,18 +186,33 @@ module mir(){
 }
 
 // Joiner
+/*if(false||g==undef&&part=="joiner"){
+    mir()difference(){
+        rotate_extrude()polygon(points=[
+    [outer_d/2-4*scl-d/2-2*tol,-d-4*scl],[outer_d/2-2*scl-d/2-2*tol,-d-4*scl],[outer_d/2-2*scl-2*tol,-d/2-4*scl],[outer_d/2-2*scl-2*tol,-d/2-2*scl],[outer_d/2-2*scl-d/2-2*tol,-2*scl],[outer_d/2-2*scl-d/2-2*tol,0],[outer_d/2-4*scl-d/2-2*tol,0]
+        ]);
+        //cube([2*(outer_d/2-2*scl-d/2-2*tol),outer_d-4*scl-4*tol,core_h],center=true);
+        translate([0,0,TT])mirror([0,0,1]){
+            translate(-[outer_d/2+2*scl-d/2-2*tol,outer_d/2,0])
+                cube([4*scl,outer_d,d+4*scl+AT]);
+            rotate(-45)cube([outer_d,outer_d,d+4*scl+AT]);
+        }
+    }
+    
+}*/
+
 if(false||g==undef&&part=="joiner"){
     mir()intersection(){
         rotate_extrude()polygon(points=[
-        [outer_d/2-4*scl-d/2-2*tol,2*scl-core_h/2],[0,2*scl-core_h/2],[0,-core_h/2],
-    [outer_d/2-4*scl-d/2-2*tol,-core_h/2],[outer_d/2-2*scl-d/2-2*tol,-core_h/2],[outer_d/2-2*scl-d/2-2*tol,-d-4*scl],[outer_d/2-2*scl-2*tol,-d/2-4*scl],[outer_d/2-2*scl-2*tol,-d/2-2*scl],[outer_d/2-2*scl-d/2-2*tol,-2*scl],[outer_d/2-2*scl-d/2-2*tol,0],[outer_d/2-4*scl-d/2-2*tol,0]
-        ]);
+            [outer_d/2-4*scl-d/2-2*tol,2*scl-d-4*scl],[0,2*scl-d-4*scl],[0,-d-4*scl],
+            [outer_d/2-4*scl-d/2-2*tol,-d-4*scl],[outer_d/2-2*scl-d/2-2*tol,-d-4*scl],[outer_d/2-2*scl-d/2-2*tol,-d-4*scl],[outer_d/2-2*scl-2*tol,-d/2-4*scl],[outer_d/2-2*scl-2*tol,-d/2-2*scl],[outer_d/2-2*scl-d/2-2*tol,-2*scl],[outer_d/2-2*scl-d/2-2*tol,0],[outer_d/2-4*scl-d/2-2*tol,0]
+         ]);
         cube([outer_d-12*scl-d-4*tol,outer_d-4*scl-4*tol,core_h],center=true);
     }
-    //pinhole(r=outer_d/2-2*scl,l=core_h/8,nub=core_h/32,fixed=false,fins=false);
-    //pinpeg(r=outer_d/2-2*scl,l=core_h,d=core_h/2,nub=1*scl,t=2*d+16*scl,space=2*tol);
-    //pinpeg(r=3.5,l=13,d=2.4,nub=0.4,t=1.8,space=0.3)
 }
+
+
+
 
 // Box
 if(g==0||g==undef&&(part=="box"||part=="lower"||part=="upper"))difference(){
@@ -228,7 +241,10 @@ difference(){
         difference(){
             cylinder(d=outer_d,h=core_h2-layer_h,$fn=96);
             // centre hole
-            translate([0,0,-TT])cylinder(d=10*scl,h=core_h2-layer_h+AT,$fn=96);
+            //translate([0,0,-TT])cylinder(d=10*scl,h=core_h2-layer_h+AT,$fn=96);
+            //translate([0,0,3*scl])cylinder(d=6.5*scl,h=core_h2-layer_h+AT,$fn=96);
+            translate([0,0,-TT])cylinder(d=3*scl,h=core_h2-layer_h+AT,$fn=24);
+            //rotate(90+45/4)translate([0,3*scl+tol,core_h2-3*scl])mirror([0,1,1])cylinder(r=3*scl+tol,h=3*scl+2*tol,center=true,$fn=24);
         }
     // slots for latch movement
     intersection(){
@@ -241,8 +257,11 @@ difference(){
             h=core_h+core_h2-2*scl-cube_w/2;
             d=cube_w/2-r1-2*scl;
             dz=d/sqrt(3);
-            for(j=[1:8])rotate(j*360/8+45/4)translate([r1-4*scl-e,0,0])mirror([0,1,1])
-                cylinder(r=core_h2-layer_h-ld*scl+2*tol,h=3*scl+4*tol,center=true);
+            for(j=[1:8])rotate(j*360/8+45/4)translate([r1-4*scl-e,0,0])mirror([0,1,1]){
+                cylinder(r=core_h2-layer_h-ld*scl+2*tol,h=3*scl+8*tol,center=true);
+                // extra clearance in direction magnets pull
+                //translate([-2*tol,0,0])cylinder(r=core_h2-layer_h-ld*scl+2*tol,h=3*scl+8*tol,center=true);
+            }
         }
     }
     // holes for magnet insertion
@@ -256,7 +275,7 @@ difference(){
             dz=d/sqrt(3);
             rotate(j*360/8+45/4)translate([r1-4*scl-e,0,0])mirror([0,1,1])
                 rotate(115)translate([0,core_h2-layer_h-ld*scl-3*scl-5*tol,0])
-                    cylinder(r=3*scl+tol,h=3*scl+4*tol,center=true,$fn=24);
+                    cylinder(r=3*scl+tol,h=3*scl+2*tol,center=true,$fn=24);
         }
         // supporting layer
         //translate([0,0,core_h2-9*layer_h-cube_w/2])cylinder(d=outer_d,h=layer_h,$fn=96);
@@ -449,18 +468,18 @@ intersection(){
         // outer teeth
         rotate(j*360/8+45/4)translate([r1-4*scl-e,0,0])mirror([0,1,1]){
             difference(){
-                cylinder(r=core_h2-layer_h-ld*scl,h=3*scl,center=true);
-                cylinder(r=2*scl+2*tol,h=3*scl+4*tol,center=true);
+                cylinder(r=core_h2-layer_h-ld*scl,h=3*scl+4*tol+AT,center=true);
+                cylinder(r=2*scl+2*tol,h=3*scl+4*tol+ST,center=true,$fn=24);
                 // hole for magnet
                 rotate(115)translate([0,core_h2-layer_h-ld*scl-3*scl-5*tol,0])
-                    cylinder(r=3*scl+tol/2,h=3*scl+AT,center=true);
+                    cylinder(r=3*scl+tol/2,h=3*scl,center=true,$fn=24);
             }
-            cylinder(r=2*scl,h=3*scl+4*tol+2*AT,center=true);
+            cylinder(r=2*scl,h=3*scl+8*tol+2*AT,center=true,$fn=24);
             // bridge helpers
             intersection(){
                 difference(){
-                    cylinder(r=core_h2-layer_h-ld*scl,h=3*scl+4*tol+AT,center=true);
-                    cylinder(r=core_h2-layer_h-ld*scl-layer_h,h=3*scl+4*tol+ST,center=true);
+                    cylinder(r=core_h2-layer_h-ld*scl,h=3*scl+8*tol+AT,center=true);
+                    cylinder(r=core_h2-layer_h-ld*scl-layer_h,h=3*scl+8*tol+ST,center=true);
                 }
                 mirror([0,1,1])translate(-[r1-4*scl-e,0,0])rotate(-j*360/8-45/4)
                 translate(-[0,0,core_h2-layer_h-5*scl-cube_w/2])
@@ -485,7 +504,7 @@ intersection(){
 //pinhole(r=outer_d/2-2*scl,l=core_h/8,nub=core_h/32,fixed=false,fins=false);
 
 // Core
-if(true||g==1||g==undef&&part=="core")translate([0,0,core_h2-cube_w/2]){
+if(false||g==1||g==undef&&part=="core")translate([0,0,core_h2-cube_w/2]){
     difference(){
         // positive volume
         union(){
@@ -648,49 +667,3 @@ function reverse(list) = [for (i = [len(list)-1:-1:0]) list[i]];
 
 // Recursively sums all elements of a list up to n'th element, counting from 1
 function addl(list,n=0) = n>0?(n<=len(list)?list[n-1]+addl(list,n-1):list[n-1]):0;
-
-
-// Snap pins by emmet https://www.thingiverse.com/thing:213310
-module pin(r=3.5,l=13,d=2.4,slot=10,nub=0.4,t=1.8,space=0.3,flat=1)
-translate(flat*[0,0,r/sqrt(2)-space])rotate((1-flat)*[90,0,0])
-difference(){
-	rotate([-90,0,0])intersection(){
-		union(){
-			translate([0,0,-0.01])cylinder(r=r-space,h=l-r-0.98);
-			translate([0,0,l-r-1])cylinder(r1=r-space,r2=0,h=r-space/2+1);
-			translate([nub+space,0,d])nub(r-space,nub+space);
-			translate([-nub-space,0,d])nub(r-space,nub+space);
-		}
-		cube([3*r,r*sqrt(2)-2*space,2*l+3*r],center=true);
-	}
-	translate([0,d,0])cube([2*(r-t-space),slot,2*r],center=true);
-	translate([0,d-slot/2,0])cylinder(r=r-t-space,h=2*r,center=true,$fn=12);
-	translate([0,d+slot/2,0])cylinder(r=r-t-space,h=2*r,center=true,$fn=12);
-}
-
-module nub(r,nub)
-union(){
-	translate([0,0,-nub-0.5])cylinder(r1=r-nub,r2=r,h=nub);
-	cylinder(r=r,h=1.02,center=true);
-	translate([0,0,0.5])cylinder(r1=r,r2=r-nub,h=5);
-}
-
-module pinhole(r=3.5,l=13,d=2.5,nub=0.4,fixed=false,fins=true)
-intersection(){
-	union(){
-		translate([0,0,-0.1])cylinder(r=r,h=l-r+0.1);
-		translate([0,0,l-r-0.01])cylinder(r1=r,r2=0,h=r);
-		translate([0,0,d])nub(r+nub,nub);
-		if(fins)translate([0,0,l-r]){
-			cube([2*r,0.01,2*r],center=true);
-			cube([0.01,2*r,2*r],center=true);
-		}
-	}
-	if(fixed)cube([3*r,r*sqrt(2),2*l+3*r],center=true);
-}
-
-module pinpeg(r=3.5,l=13,d=2.4,nub=0.4,t=1.8,space=0.3)
-union(){
-	pin(r=r,l=l,d=d,nub=nub,t=t,space=space,flat=1);
-	mirror([0,1,0])pin(r=r,l=l,d=d,nub=nub,t=t,space=space,flat=1);
-}
