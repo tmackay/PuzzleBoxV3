@@ -23,7 +23,7 @@ layer_h_ = 0.2; //[0:0.01:1]
 layer_h = scl*layer_h_;
 
 // Height of planetary layers (layer_h will be subtracted from gears>0). Non-uniform heights will reveal bugs.
-gh_ = 6.8*[1, 1, 1, 1, 1, 1];
+gh_ = 6.6*[1, 1, 1, 1, 1, 1];
 gh = scl*gh_;
 
 // Tolerances for geometry connections.
@@ -53,7 +53,7 @@ module mir(){
     mirror([0,0,1])children();
 }
 
-ld=7.3;
+ld=8.1;
 
 // cylinder with recess for locking teeth
 difference(){
@@ -68,8 +68,8 @@ difference(){
         }
     // slots for latch movement
     intersection(){
-        translate([0,0,-cube_w/2])
-            cylinder(d=outer_d+tol,h=core_h2-layer_h-2*scl+2*tol,$fn=96);
+        //translate([0,0,-cube_w/2])
+            //cylinder(d=outer_d+tol,h=core_h2-layer_h-2*scl+2*tol,$fn=96);
         translate([0,0,core_h2-layer_h-6*scl-cube_w/2]){
             r=(outer_d+outer_w/sqrt(2))/2+2*tol;
             r1=outer_d/2;
@@ -78,9 +78,9 @@ difference(){
             d=cube_w/2-r1-2*scl;
             dz=d/sqrt(3);
             for(j=[1:8])rotate(j*360/8+45/4)translate([r1-4*scl-e,0,0])mirror([0,1,1]){
-                cylinder(r=core_h2-layer_h-ld*scl+2*tol,h=3*scl+8*tol,center=true);
+                cylinder(r=core_h2-layer_h-ld*scl+4*tol,h=3*scl+8*tol,center=true);
                 // extra clearance in direction magnets pull
-                translate([-2*tol,0,0])cylinder(r=core_h2-layer_h-ld*scl+2*tol,h=3*scl+8*tol,center=true);
+                //translate([-2*tol,0,0])cylinder(r=core_h2-layer_h-ld*scl+2*tol,h=3*scl+8*tol,center=true);
             }
         }
     }
@@ -96,9 +96,8 @@ difference(){
             rotate(115)translate([0,core_h2-layer_h-ld*scl-3*scl-5*tol,0])
                 cylinder(r=3*scl+tol,h=3*scl+2*tol,center=true,$fn=24);
     }
-    
     // holes for outer magnet insertion
-    for(j=[1:8])translate([0,0,core_h2-layer_h-6*scl-cube_w/2]){
+    /*for(j=[1:8])translate([0,0,core_h2-layer_h-6*scl-cube_w/2]){
         r=(outer_d+outer_w/sqrt(2))/2+2*tol;
         r1=outer_d/2;
         e=r1-sqrt(r1*r1-pow(1.5*scl+2*tol,2));
@@ -123,28 +122,30 @@ difference(){
         }
         translate([0,0,-cube_w/2])
             cylinder(d=outer_d+tol,h=core_h2-layer_h-2*scl,$fn=96);
-    }
-    
+    }*/
+
     //temporary secton
-    //rotate(45/4)translate([0,-cube_w/2,0])cube(cube_w+AT,center=true);
+    rotate(45/4)translate([0,-cube_w/2,0])cube(cube_w+AT,center=true);
 }
 
 // locking teeth
 r1=outer_d/2;
 e=r1-sqrt(r1*r1-pow(1.5*scl+2*tol,2));
 la=0;
+ca=45;
 for(j=[1:8])
 translate([0,0,core_h2-layer_h-6*scl-cube_w/2])rotate(j*360/8+45/4)translate([r1-4*scl-e,0,0])
 rotate([0,-la,0])
 translate(-[r1-4*scl-e,0,0])rotate(-j*360/8-45/4)translate(-[0,0,core_h2-layer_h-6*scl-cube_w/2])
 intersection(){
-    translate([0,0,-cube_w/2])rotate_extrude(){
+    /*translate([0,0,-cube_w/2])rotate_extrude(){
         translate([r1-4*scl,core_h2-layer_h-6*scl])circle(r=4*scl);
         difference(){
             square([r1,core_h2-layer_h-2*scl]);
             translate([r1-4*scl,core_h2-layer_h-6*scl])square([4*scl,4*scl]);
         }
-    }
+    }*/
+    translate([0,0,-cube_w/2])cylinder(d=outer_d,h=2*core_h2,$fn=96);
     translate([0,0,core_h2-layer_h-6*scl-cube_w/2]){
         r=(outer_d+outer_w/sqrt(2))/2+2*tol;
         h=core_h+core_h2-2*scl-cube_w/2;
@@ -152,12 +153,16 @@ intersection(){
         dz=d/sqrt(3);        
         // outer teeth
         rotate(j*360/8+45/4)translate([r1-4*scl-e,0,0])mirror([0,1,1]){
-            difference(){
-                cylinder(r=core_h2-layer_h-ld*scl,h=3*scl+4*tol+AT,center=true);
-                cylinder(r=2*scl+2*tol,h=3*scl+4*tol+ST,center=true,$fn=24);
-                // hole for magnet
-                rotate(115)translate([0,core_h2-layer_h-ld*scl-3*scl-5*tol,0])
-                    cylinder(r=3*scl+tol/2,h=3*scl,center=true,$fn=24);
+            intersection(){
+                difference(){
+                    cylinder(r=core_h2-layer_h-ld*scl,h=3*scl+4*tol+AT,center=true);
+                    cylinder(r=2*scl+2*tol,h=3*scl+4*tol+ST,center=true,$fn=24);
+                    // hole for magnet
+                    rotate(115+ca)translate([0,core_h2-layer_h-ld*scl-3*scl-5*tol,0])
+                        cylinder(r=3*scl+tol/2,h=3*scl,center=true,$fn=24);
+                }
+                rotate(ca)translate(-[core_h2-layer_h-ld*scl,4*scl,(3*scl+4*tol+AT)/2])
+                    cube([2*(core_h2-layer_h-ld*scl),core_h2-layer_h-ld*scl+4*scl,3*scl+4*tol+AT]);
             }
             cylinder(r=2*scl,h=3*scl+8*tol+2*AT,center=true,$fn=24);
             // bridge helpers
