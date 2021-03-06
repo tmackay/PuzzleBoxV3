@@ -296,7 +296,7 @@ if(true){
     }
 
     color("red")difference(){
-        cylinder(r=outer_d/2-7*scl-4*tol,h=core_h/2);
+        translate([0,0,layer_h])cylinder(r=outer_d/2-7*scl-4*tol,h=core_h/2-layer_h);
         
         // maze path
         for(j=[0:3])path((core_h/4-2.5*scl-layer_h)*1.8,180*1.8,50)mirror([j%2,0,0])
@@ -323,7 +323,7 @@ if(true){
             [outer_d/2-11*scl-8*tol,-TT],
             [outer_d/2-12*scl-8*tol,-TT]]);
             for(j=[0:3]){
-                rotate((j?j*360/3:180)+360/16+360/32+180)
+                rotate((j?j*360/3:180)+360/16+360/32)
                     translate([0,-2*scl-2*tol,0])cube([outer_d/2,4*scl+4*tol,6*scl+4*scl-layer_h]);
             }
         }
