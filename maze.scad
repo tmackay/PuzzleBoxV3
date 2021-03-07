@@ -270,7 +270,7 @@ if(false||g==1||g==undef&&part=="core"){
 tra=core_h/2-5*scl-2*layer_h;
 maze=[
     [0,0,0,tra*0.9,360*0.9,360*0.9,50,1,1,1],
-    [tra*0.9,360*0.9,360*0.9,tra*0.1,0,45,10,1,1,1],
+    [tra*0.9,360*0.9,360*0.9,tra,360*0.9,360+45,10,1,1,1],
 
     //[0,0,0,tra*1.8,0,0,50,1,1,1],
 ];
@@ -344,7 +344,7 @@ if(true){
 // cut a path segment, translate t, rotate r over s steps
 module path(it=0,ir=0,t=0,r=0,s=0,pt=1,pr=1){
     translate([0,0,it])rotate(ir)if(s)for(i=[1:s])hull(){
-        translate([0,0,t*pow(i/s,pt)])rotate(r*pow(i/s,pr))children();
-        translate([0,0,t*pow((i-1)/s,pt)])rotate(r*pow((i-1)/s,pr))children();
+        translate([0,0,(t-it)*pow(i/s,pt)])rotate((r-ir)*pow(i/s,pr))children();
+        translate([0,0,(t-it)*pow((i-1)/s,pt)])rotate((r-ir)*pow((i-1)/s,pr))children();
     }else children();
 }
