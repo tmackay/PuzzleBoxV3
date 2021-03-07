@@ -241,7 +241,10 @@ if(false||g==1||g==undef&&part=="core"){
         }*/
     }
     
-    // Inner slider
+}
+
+// Inner slider
+if(true){
     translate([0,0,core_h2-cube_w/2])
         difference(){
             cylinder(r=outer_d/2-5*scl-2*tol,h=core_h/2);
@@ -262,9 +265,8 @@ if(false||g==1||g==undef&&part=="core"){
     for(j=[0:3])mirror([j%2,0,0])
         translate([outer_d/2-7*scl-2*tol+AT,0,floor(j/2)%2?-2.5*scl-layer_h:2.5*scl+layer_h-core_h/2])
             mirror([1,0,1])cylinder(r1=2.5*scl,r2=0.5*scl,h=2*scl+AT,$fn=24);
-
-    
 }
+
 // (translate,rotate) start, finish, steps, power
 // it, ir1, ir2, t, r1, r2, s, pt, pr1, pr2
 tra=core_h/2-5*scl-2*layer_h;
@@ -273,8 +275,8 @@ tra=core_h/2-5*scl-2*layer_h;
     [tra*0.9,360*0.9,360*0.9,tra,360*0.9,360,5,1,1,1],
 ];*/
 maze=[
-    [0,0,0,5*scl+2*layer_h,20,0,10,1,1,1],
-    [5*scl+2*layer_h,20,0,tra*0.9,360*0.9,360*0.9,50,1,1,1],
+    [0,0,10,5*scl+2*layer_h,20,10,10,1,1,1],
+    [5*scl+2*layer_h,20,10,tra*0.9,360*0.9,360*0.9,50,1,1,1],
     [tra*0.9,360*0.9,360*0.9,tra,360*0.9,360,5,1,1,1],
 ];
 
