@@ -63,7 +63,7 @@ ld=8.1;
 //    cylinder(d=outer_d,h=core_h2-layer_h,$fn=96);
 
 // Core
-if(true||g==1||g==undef&&part=="core"){
+if(false||g==1||g==undef&&part=="core"){
     difference(){
         // positive volume
         union(){
@@ -265,6 +265,15 @@ if(true||g==1||g==undef&&part=="core"){
 
     
 }
+// (translate,rotate) start, finish, steps, power
+// it, ir1, ir2, t, r1, r2, s, pt, pr1, pr2
+tra=core_h/2-5*scl-2*layer_h;
+maze=[
+    [0,0,0,tra*0.9,360*0.9,360*0.9,50,1,1,1],
+    [tra*0.9,360*0.9,360*0.9,tra*0.1,0,45,10,1,1,1],
+
+    //[0,0,0,tra*1.8,0,0,50,1,1,1],
+];
 
 // central shafts
 if(true){
@@ -272,9 +281,10 @@ if(true){
         translate([0,0,core_h2-cube_w/2])
             cylinder(r=outer_d/2-7*scl-4*tol,h=core_h/2);
         // maze path
-        for(j=[0:3])path((core_h/4-2.5*scl-layer_h)*1.8,180*1.8,50)mirror([j%2,0,0])
-            translate([outer_d/2-7*scl-4*tol+AT,0,floor(j/2)%2?-2.5*scl-layer_h:2.5*scl+layer_h-core_h/2])
-                mirror([1,0,1])cylinder(r1=2.5*scl,r2=0.5*scl,h=2*scl+AT,$fn=24);
+        for(j=[0:3],k=[0:len(maze)-1])
+            path(maze[k][0],maze[k][1],maze[k][3],maze[k][4],maze[k][6],maze[k][7],maze[k][9])mirror([j%2,0,0])
+                translate([outer_d/2-7*scl-4*tol+AT,0,floor(j/2)%2?-2.5*scl-layer_h:2.5*scl+layer_h-core_h/2])
+                    mirror([1,0,1])cylinder(r1=2.5*scl,r2=0.5*scl,h=2*scl+AT,$fn=24);
     }
 
     // post
@@ -299,9 +309,10 @@ if(true){
         translate([0,0,layer_h])cylinder(r=outer_d/2-7*scl-4*tol,h=core_h/2-layer_h);
         
         // maze path
-        for(j=[0:3])path((core_h/4-2.5*scl-layer_h)*1.8,180*1.8,50)mirror([j%2,0,0])
-            translate([outer_d/2-7*scl-4*tol+AT,0,floor(j/2)%2?-2.5*scl-layer_h:2.5*scl+layer_h-core_h/2])
-                mirror([1,0,1])cylinder(r1=2.5*scl,r2=0.5*scl,h=2*scl+AT,$fn=24);
+        for(j=[0:3],k=[0:len(maze)-1])
+            path(maze[k][0],maze[k][2],maze[k][3],maze[k][5],maze[k][6],maze[k][7],maze[k][9])mirror([j%2,0,0])
+                translate([outer_d/2-7*scl-4*tol+AT,0,floor(j/2)%2?-2.5*scl-layer_h:2.5*scl+layer_h-core_h/2])
+                    mirror([1,0,1])cylinder(r1=2.5*scl,r2=0.5*scl,h=2*scl+AT,$fn=24);
         // socket
         translate([0,0,-TT])cylinder(r=outer_d/2-11*scl-8*tol,h=10*scl+2*tol+TT);
         translate([0,0,4*scl-layer_h])
@@ -330,12 +341,10 @@ if(true){
     }
 }
 
-
-
-
-module path(t=0,r=0,s=0){
-    if(s)for(i=[1:s])hull(){
-        translate([0,0,t/s*i])rotate(r/s*i)children();
-        translate([0,0,t/s*(i-1)])rotate(r/s*(i-1))children();
+// cut a path segment, translate t, rotate r over s steps
+module path(it=0,ir=0,t=0,r=0,s=0,pt=1,pr=1){
+    translate([0,0,it])rotate(ir)if(s)for(i=[1:s])hull(){
+        translate([0,0,t*pow(i/s,pt)])rotate(r*pow(i/s,pr))children();
+        translate([0,0,t*pow((i-1)/s,pt)])rotate(r*pow((i-1)/s,pr))children();
     }else children();
 }
