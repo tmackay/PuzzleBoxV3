@@ -275,10 +275,22 @@ tra=core_h/2-5*scl-2*layer_h;
     [tra*0.9,360*0.9,360*0.9,tra,360*0.9,360,5,1,1,1],
 ];*/
 maze=[
-    [0,0,10,5*scl+2*layer_h,20,10,10,1,1,1],
-    [5*scl+2*layer_h,20,10,tra*0.9,360*0.9,360*0.9,50,1,1,1],
+    [0,0,0,5*scl+2*layer_h,20,0,10,1,1,1],
+    [5*scl+2*layer_h,20,0,tra*0.9,360*0.9,360*0.9,50,1,1,1],
     [tra*0.9,360*0.9,360*0.9,tra,360*0.9,360,5,1,1,1],
 ];
+
+/*difference(){
+    cylinder(r=outer_d/2-9*scl-4*tol,h=layer_h);
+    cylinder(r=outer_d/2-9*scl-8*tol,h=layer_h);
+}*/
+//translate([outer_d/2-9*scl-4*tol,0,0])rotate([0,45,0])cube(2*scl);
+//translate([outer_d/2-9*scl-8*tol,0,0])rotate([0,180+45,0])cube(2*scl);
+
+/*translate([0,0,layer_h])rotate_extrude(){
+    translate([outer_d/2-9*scl-4*tol,0,0])rotate(-45)square(3*scl);
+    translate([outer_d/2-9*scl-8*tol,0,0])rotate(-180-45)square(3*scl);
+}*/
 
 // central shafts
 if(true){
@@ -343,6 +355,13 @@ if(true){
                     translate([0,-2*scl-2*tol,0])cube([outer_d/2,4*scl+4*tol,6*scl+4*scl-layer_h]);
             }
         }
+        
+        // tapered bottom
+        translate([0,0,layer_h])rotate_extrude(){
+            translate([outer_d/2-9*scl-4*tol,0,0])rotate(-45)square(3*scl);
+            translate([outer_d/2-9*scl-8*tol,0,0])rotate(-180-45)square(3*scl);
+        }
+        
     }
 }
 
