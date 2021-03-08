@@ -14,6 +14,9 @@ outer_d = scl*outer_d_;
 outer_w_=3; //[0:0.1:10]
 outer_w=scl*outer_w_;
 
+// Pegs to navigate labyrinth
+pegs=1;
+
 // Gear clearance
 tol_=0.2; //[0:0.01:0.5]
 tol=scl*tol_;
@@ -262,8 +265,8 @@ if(true){
     }
     
     // maze teeth
-    for(j=[0:3])mirror([j%2,0,0])
-        translate([outer_d/2-7*scl-2*tol+AT,0,floor(j/2)%2?-2.5*scl-layer_h:2.5*scl+layer_h-core_h/2])
+    for(j=[0:pegs-1],k=[0:1])rotate(j*360/pegs)
+        translate([outer_d/2-7*scl-2*tol+AT,0,k?-2.5*scl-layer_h:2.5*scl+layer_h-core_h/2])
             mirror([1,0,1])cylinder(r1=2.5*scl,r2=0.5*scl,h=2*scl+AT,$fn=24);
 }
 
@@ -298,9 +301,9 @@ if(true){
         translate([0,0,core_h2-cube_w/2])
             cylinder(r=outer_d/2-7*scl-4*tol,h=core_h/2);
         // maze path
-        for(j=[0:3],k=[0:len(maze)-1])
-            path(maze[k][0],maze[k][1],maze[k][3],maze[k][4],maze[k][6],maze[k][7],maze[k][9])mirror([j%2,0,0])
-                translate([outer_d/2-7*scl-4*tol+AT,0,floor(j/2)%2?-2.5*scl-layer_h:2.5*scl+layer_h-core_h/2])
+        for(j=[0:pegs-1],k=[0:1],l=[0:len(maze)-1])
+            path(maze[l][0],maze[l][1],maze[l][3],maze[l][4],maze[l][6],maze[l][7],maze[l][9])rotate(j*360/pegs)
+                translate([outer_d/2-7*scl-4*tol+AT,0,k?-2.5*scl-layer_h:2.5*scl+layer_h-core_h/2])
                     mirror([1,0,1])cylinder(r1=2.5*scl,r2=0.5*scl,h=2*scl+AT,$fn=24);
     }
 
@@ -317,18 +320,18 @@ if(true){
     [outer_d/2-11*scl-10*tol,2*scl],
     [outer_d/2-12*scl-10*tol,2*scl]]);
         for(j=[0:3]){
-            rotate((j?j*360/3:180)+360/16+360/32)
-                translate([0,-2*scl,0])cube([outer_d/2,4*scl,core_h/2+2*scl]);
+            rotate((j?j*360/3:180)+360/16+360/32+180)
+                translate([outer_d/4,0,core_h/4+scl])cube([outer_d/2,(j<3?4:6)*scl,core_h/2+2*scl],center=true);
         }
     }
 
-    color("red")difference(){
+    color("red")rotate(180)difference(){
         translate([0,0,layer_h])cylinder(r=outer_d/2-7*scl-4*tol,h=core_h/2-layer_h);
         
         // maze path
-        for(j=[0:3],k=[0:len(maze)-1])
-            path(maze[k][0],maze[k][2],maze[k][3],maze[k][5],maze[k][6],maze[k][7],maze[k][9])mirror([j%2,0,0])
-                translate([outer_d/2-7*scl-4*tol+AT,0,floor(j/2)%2?-2.5*scl-layer_h:2.5*scl+layer_h-core_h/2])
+        for(j=[0:pegs-1],k=[0:1],l=[0:len(maze)-1])
+            path(maze[l][0],maze[l][2],maze[l][3],maze[l][5],maze[l][6],maze[l][7],maze[l][9])rotate(j*360/pegs)
+                translate([outer_d/2-7*scl-4*tol+AT,0,k?-2.5*scl-layer_h:2.5*scl+layer_h-core_h/2])
                     mirror([1,0,1])cylinder(r1=2.5*scl,r2=0.5*scl,h=2*scl+AT,$fn=24);
         // socket
         translate([0,0,-TT])cylinder(r=outer_d/2-11*scl-8*tol,h=10*scl+2*tol+TT);
@@ -352,7 +355,7 @@ if(true){
             [outer_d/2-12*scl-8*tol,-TT]]);
             for(j=[0:3]){
                 rotate((j?j*360/3:180)+360/16+360/32)
-                    translate([0,-2*scl-2*tol,0])cube([outer_d/2,4*scl+4*tol,6*scl+4*scl-layer_h]);
+                    translate([outer_d/4,0,core_h/4+scl])cube([outer_d/2,(j<3?4:6)*scl+4*tol,core_h/2+2*scl],center=true);
             }
         }
         
