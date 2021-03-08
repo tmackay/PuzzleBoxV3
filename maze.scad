@@ -245,13 +245,13 @@ if(false||g==1||g==undef&&part=="core"){
     }
     
 }
-
+echo(core_h);
 // Inner slider
 if(true){
     translate([0,0,core_h2-cube_w/2])
         difference(){
-            cylinder(r=outer_d/2-5*scl-2*tol,h=core_h/2);
-            translate([0,0,-TT])cylinder(r=outer_d/2-7*scl-2*tol,h=core_h/2+AT);
+            cylinder(r=outer_d/2-5*scl-2*tol,h=core_h/2+2.5*scl);
+            translate([0,0,-TT])cylinder(r=outer_d/2-7*scl-2*tol,h=core_h/2+2.5*scl+AT);
         }
 
     // slider teeth
@@ -266,13 +266,13 @@ if(true){
     
     // maze teeth
     for(j=[0:pegs-1],k=[0:1])rotate(j*360/pegs)
-        translate([outer_d/2-7*scl-2*tol+AT,0,k?-2.5*scl-layer_h:2.5*scl+layer_h-core_h/2])
+        translate([outer_d/2-7*scl-2*tol+AT,0,k?-layer_h:2.5*scl+layer_h-core_h/2])
             mirror([1,0,1])cylinder(r1=2.5*scl,r2=0.5*scl,h=2*scl+AT,$fn=24);
 }
 
 // (translate,rotate) start, finish, steps, power
 // it, ir1, ir2, t, r1, r2, s, pt, pr1, pr2
-tra=core_h/2-5*scl-2*layer_h;
+tra=core_h/2-2.5*scl-2*layer_h;
 /*maze=[
     [0,0,0,tra*0.9,360*0.9,360*0.9,50,1,1,1],
     [tra*0.9,360*0.9,360*0.9,tra,360*0.9,360,5,1,1,1],
@@ -297,20 +297,20 @@ maze=[
 
 // central shafts
 if(true){
-    color("green")difference(){
+    difference(){
         translate([0,0,core_h2-cube_w/2])
-            cylinder(r=outer_d/2-7*scl-4*tol,h=core_h/2);
+            cylinder(r=outer_d/2-7*scl-4*tol,h=core_h/2+2.5*scl);
         // maze path
         for(j=[0:pegs-1],k=[0:1],l=[0:len(maze)-1])
             path(maze[l][0],maze[l][1],maze[l][3],maze[l][4],maze[l][6],maze[l][7],maze[l][9])rotate(j*360/pegs)
-                translate([outer_d/2-7*scl-4*tol+AT,0,k?-2.5*scl-layer_h:2.5*scl+layer_h-core_h/2])
+                translate([outer_d/2-7*scl-4*tol+AT,0,k?-layer_h:2.5*scl+layer_h-core_h/2])
                     mirror([1,0,1])cylinder(r1=2.5*scl,r2=0.5*scl,h=2*scl+AT,$fn=24);
     }
 
     // post
-    translate([0,0,-TT])cylinder(r=outer_d/2-11*scl-10*tol,h=10*scl+AT);
+    translate([0,0,2.5*scl-TT])cylinder(r=outer_d/2-11*scl-10*tol,h=10*scl+AT);
     // key
-    translate([0,0,4*scl-layer_h])intersection(){
+    translate([0,0,6.5*scl-layer_h])intersection(){
         rotate_extrude(convexity=5)
             polygon(points=[
     [outer_d/2-12*scl-10*tol,4*scl+2*scl],
@@ -325,17 +325,17 @@ if(true){
         }
     }
 
-    color("red")rotate(180)difference(){
-        translate([0,0,layer_h])cylinder(r=outer_d/2-7*scl-4*tol,h=core_h/2-layer_h);
+    rotate(180)difference(){
+        translate([0,0,2.5*scl+layer_h])cylinder(r=outer_d/2-7*scl-4*tol,h=core_h/2-2.5*scl-layer_h);
         
         // maze path
         for(j=[0:pegs-1],k=[0:1],l=[0:len(maze)-1])
             path(maze[l][0],maze[l][2],maze[l][3],maze[l][5],maze[l][6],maze[l][7],maze[l][9])rotate(j*360/pegs)
-                translate([outer_d/2-7*scl-4*tol+AT,0,k?-2.5*scl-layer_h:2.5*scl+layer_h-core_h/2])
+                translate([outer_d/2-7*scl-4*tol+AT,0,k?-layer_h:2.5*scl+layer_h-core_h/2])
                     mirror([1,0,1])cylinder(r1=2.5*scl,r2=0.5*scl,h=2*scl+AT,$fn=24);
         // socket
-        translate([0,0,-TT])cylinder(r=outer_d/2-11*scl-8*tol,h=10*scl+2*tol+TT);
-        translate([0,0,4*scl-layer_h])
+        translate([0,0,2.5*scl-TT])cylinder(r=outer_d/2-11*scl-8*tol,h=10*scl+2*tol+TT);
+        translate([0,0,6.5*scl-layer_h])
             rotate_extrude(convexity=5)
                     polygon(points=[
             [outer_d/2-12*scl-8*tol,4*scl+2*scl],
@@ -344,7 +344,7 @@ if(true){
             [outer_d/2-9*scl-8*tol,2*scl/sqrt(3)+2*scl],
             [outer_d/2-11*scl-8*tol,2*scl],
             [outer_d/2-12*scl-8*tol,2*scl]]);
-        intersection(){
+        translate([0,0,2.5*scl])intersection(){
             rotate_extrude(convexity=5)
                     polygon(points=[
             [outer_d/2-12*scl-8*tol,10*scl-layer_h],
@@ -360,7 +360,7 @@ if(true){
         }
         
         // tapered bottom
-        translate([0,0,layer_h])rotate_extrude(){
+        translate([0,0,2.5*scl+layer_h])rotate_extrude(){
             translate([outer_d/2-9*scl-4*tol,0,0])rotate(-45)square(3*scl);
             translate([outer_d/2-9*scl-8*tol,0,0])rotate(-180-45)square(3*scl);
         }
