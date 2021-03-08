@@ -61,12 +61,11 @@ module mir(){
 
 ld=8.1;
 
-
-//mir()translate([0,0,-cube_w/2])
-//    cylinder(d=outer_d,h=core_h2-layer_h,$fn=96);
+// travel of inner slider
+tra=core_h/2-2.5*scl-2*layer_h;
 
 // Core
-if(false||g==1||g==undef&&part=="core"){
+if(true||g==1||g==undef&&part=="core"){
     difference(){
         // positive volume
         union(){
@@ -90,27 +89,6 @@ if(false||g==1||g==undef&&part=="core"){
                 }
             }
 
-            
-            /*for (i=[0:modules-2])if(!i||pt[modules-1]*(rt[i-1]-pt[i-1]) != pt[i-1]*(rt[modules-1]-pt[modules-1]))translate([0,0,addl(gh,i)]){
-                // outer teeth
-                r=(outer_d+outer_w/sqrt(2))/2;
-                r1=outer_d/2;
-                h=gh[i]/2;
-                d=teeth_a*outer_w;
-                dz=d/sqrt(3);
-                //for(j = [1:16])
-                    translate([0,0,i>0?layer_h:0])rotate_extrude() // TODO: translate?
-                        polygon(points=[[r1-AT,0],[r1,0],[r1+d,dz],[r1+d,h-dz],[r1,h],[r1-AT,h]]);
-            }*/
-            /*difference(){
-                cylinder(r=outer_d/2,h=core_h);
-                cylinder(r=outer_d/2-teeth_a*outer_w-AT,h=core_h);
-                for (i=[0:modules-2])if(pt[modules-1]*(rt[i]-pt[i]) != pt[i]*(rt[modules-1]-pt[modules-1]))
-                    translate([0,0,addl(gh,i+1)+layer_h-bearing_h]){
-                        translate(-outer_d*[1,1,0])cube([2*outer_d,2*outer_d,layer_h]);
-                    }
-            }*/
-
             translate([0,0,core_h2-cube_w/2])
                 cylinder(r=outer_d/2,h=core_h);
                
@@ -124,124 +102,16 @@ if(false||g==1||g==undef&&part=="core"){
         // slider tracks
         translate([0,0,-core_h/2])intersection(){
             rotate_extrude(convexity=5)
-                polygon(points=[[outer_d/2-7*scl,core_h/2+2*scl],[outer_d/2-5*scl,core_h/2+2*scl],[outer_d/2-3*scl,core_h/2+2*scl-2*scl/sqrt(3)],[outer_d/2-3*scl,2*scl/sqrt(3)+2*scl],[outer_d/2-5*scl,2*scl],[outer_d/2-7*scl,2*scl]]);
+                polygon(points=[[outer_d/2-7*scl,4*scl+tra+2*scl],[outer_d/2-5*scl,4*scl+tra+2*scl],[outer_d/2-3*scl,4*scl+tra+2*scl-2*scl/sqrt(3)],[outer_d/2-3*scl,2*scl/sqrt(3)+2*scl],[outer_d/2-5*scl,2*scl],[outer_d/2-7*scl,2*scl]]);
             for(j = [1:8]){
                 rotate(j*360/8+360/16+360/32)
-                    translate([0,-2*scl-2*tol,0])cube([outer_d/2,4*scl+4*tol,core_h/2+2*scl]);
+                    translate([0,-2*scl-2*tol,0])cube([outer_d/2,4*scl+4*tol,core_h]);
             }
         }
 
         // payload
         translate([0,0,core_h2-cube_w/2-TT])
             cylinder(r=outer_d/2-5*scl,h=core_h+AT);
-
-
-
-        //rotate_extrude()polygon(points=[[0,0],[outer_d/2-2*scl,0],[outer_d/2-2*scl,core_h/2-d/2-2*scl],[outer_d/2-2*scl-d/2,core_h/2-2*scl],[outer_d/2-2*scl-d/2,core_h/2],[0,core_h/2]]);
-        //pinhole(r=outer_d/2-2*scl,l=core_h/8,nub=core_h/32,fixed=false,fins=false);
-        
-        // vertical tracks
-        /*union(){
-            r=(outer_d+outer_w/sqrt(2))/2;
-            r1=outer_d/2;
-            h=gh[mid]/2;
-            h1=addl(gh,mid)-bearing_h+layer_h;
-            h2=addl(gh,mid+2);
-            d=teeth_a*outer_w;
-            dz=d/sqrt(3);
-            translate([0,0,addl(gh,mid+1)])translate([0,0,gh[mid+1]/2])rotate_extrude()
-                polygon(points=[[r1+AT,0],[r1,0],[r1-d,dz],[r1-d,h-dz],[r1,h],[r1+AT,h]]);
-            for(j = [1:16])intersection(){
-                    rotate(j*360/16+asin(tol/r1))cube([r1+d+AT,r1+d+AT,h2]);
-                    rotate(90-360/32+j*360/16-asin(tol/r1))cube([r1+d+AT,r1+d+AT,h2]);
-                    rotate_extrude()
-                        polygon(points=[[r1+d+AT,-AT],[r1-d,-AT],[r1-d,h1],[r1-d*(j%2),h1],[r1-d*(j%2),h2-dz],[r1,h2],[r1+d+AT,h2]]);
-                }
-        }*/
-
-        //translate([0,0,-spring_d/2])cylinder(d=shaft_d,h=core_h/2,$fn=24);
-        //translate([0,0,core_h/2+spring_d/2])cylinder(d=shaft_d,h=core_h/2,$fn=24);
-        //translate([0,0,core_h/2-spring_d/2])cylinder(d=spring_d,h=spring_d,$fn=24);
-        //translate([0,0,core_h/2-spring_d/2])cylinder(d2=spring_d,d1=shaft_d,h=(shaft_d-spring_d)/2,$fn=24);
-        //translate([0,0,core_h/2+spring_d/2-(shaft_d-spring_d)/2])cylinder(d1=spring_d,d2=shaft_d,h=(shaft_d-spring_d)/2,$fn=24);
-    
-        // upper secondary lock vertical tracks
-        /*intersection(){
-            r=(shaft_d+outer_w/sqrt(2))/2;
-            r1=shaft_d/2;
-            h=gh[0]*2;
-            d=teeth_a2*outer_w;
-            dz=d/sqrt(3);
-            translate([0,0,addl(gh,modules-1)])rotate_extrude($fn=24)
-                polygon(points=[[0,0],[r1,0],[r1+d,dz],[r1+d,h-dz],[r1,h],[0,h]]);
-            for(j = [0:1])rotate([0,0,180*j])
-                translate([r,0,addl(gh,modules-1)])scale([2,1,1])rotate([0,0,45])
-                    cylinder(d=outer_w,h=core_h+core_h2+tol+ST,$fn=4);
-        }
-        // lower secondary lock vertical tracks. TODO: dedup
-        intersection(){
-            r=(shaft_d+outer_w/sqrt(2))/2;
-            r1=shaft_d/2;
-            h=gh[0]*2;
-            d=teeth_a2*outer_w;
-            dz=d/sqrt(3);
-            translate([0,0,gh[0]-h])rotate_extrude($fn=24)
-                polygon(points=[[0,0],[r1,0],[r1+d,dz],[r1+d,h-dz],[r1,h],[0,h]]);
-            for(j = [0:1])rotate([0,0,180*j])
-                translate([r,0,gh[0]-h])scale([2,1,1])rotate([0,0,45])
-                    cylinder(d=outer_w,h=core_h+core_h2+tol+ST,$fn=4);
-        }
-    
-        // false gates - we could make it a lot harder by setting h=gh[0]/2
-        intersection(){
-            r=(shaft_d+outer_w/sqrt(2))/2;
-            r1=shaft_d/2;
-            h=gh[0]/2+fg;
-            d=teeth_a2*outer_w;
-            dz=d/sqrt(3);
-            translate([0,0,addl(gh,modules-1)])rotate_extrude($fn=24)
-                polygon(points=[[0,0],[r1,0],[r1+d,dz],[r1+d,h-dz],[r1,h],[0,h]]);
-            for(i = [-1:2:1], j = [0:1])rotate([0,0,90+180*j+i*30])
-                translate([r,0,addl(gh,modules-1)])scale([2,1,1])rotate([0,0,45])
-                    cylinder(d=outer_w,h=core_h+core_h2+tol+ST,$fn=4);
-        }
-        intersection(){
-            r=(shaft_d+outer_w/sqrt(2))/2;
-            r1=shaft_d/2;
-            h=gh[0]/2+fg;
-            d=teeth_a2*outer_w;
-            dz=d/sqrt(3);
-            translate([0,0,gh[0]-h])rotate_extrude($fn=24)
-                polygon(points=[[0,0],[r1,0],[r1+d,dz],[r1+d,h-dz],[r1,h],[0,h]]);
-            for(i = [-1:2:1], j = [0:1])rotate([0,0,90+180*j+i*30])
-                translate([r,0,gh[0]-h])scale([2,1,1])rotate([0,0,45])
-                    cylinder(d=outer_w,h=core_h+core_h2+tol+ST,$fn=4);
-        }
-        
-        // track
-        r=(shaft_d+outer_w/sqrt(2))/2;
-        r1=shaft_d/2;
-        h=gh[0]/2;
-        d=teeth_a2*outer_w;
-        dz=d/sqrt(3);
-        difference(){
-            translate([0,0,addl(gh,modules-1)])
-                rotate_extrude($fn=24)
-                    polygon(points=[[0,0],[r1,0],[r1+d,dz],[r1+d,h-dz],[r1,h],[0,h]]);
-                // end stops
-                for(j = [0:1])rotate([0,0,90+180*j])
-                    translate([r,0,addl(gh,modules-1)])scale([2,1,1])rotate([0,0,45])
-                        cylinder(d=outer_w*2,h=core_h+core_h2+tol+ST,$fn=4);
-        }
-        difference(){
-            translate([0,0,gh[0]/2])
-                rotate_extrude($fn=24)
-                    polygon(points=[[0,0],[r1,0],[r1+d,dz],[r1+d,h-dz],[r1,h],[0,h]]);
-                // end stops
-                for(j = [0:1])rotate([0,0,90+180*j])
-                    translate([r,0,gh[0]/2])scale([2,1,1])rotate([0,0,45])
-                        cylinder(d=outer_w*2,h=core_h+core_h2+tol+ST,$fn=4);
-        }*/
     }
     
 }
@@ -272,55 +142,38 @@ if(true){
 
 // (translate,rotate) start, finish, steps, power
 // it, ir1, ir2, t, r1, r2, s, pt, pr1, pr2
-tra=core_h/2-2.5*scl-2*layer_h;
-/*maze=[
-    [0,0,0,tra*0.9,360*0.9,360*0.9,50,1,1,1],
-    [tra*0.9,360*0.9,360*0.9,tra,360*0.9,360,5,1,1,1],
-];*/
 
-st=(tra-5*scl-2*layer_h)/3;
-of=5*scl+2*layer_h; // initial offset, once engaged
+of=7.5*scl+2*layer_h; // initial offset, once engaged
+st=(tra-of)/3;
 
 maze=[
-    [0,0,0,of,20,0,10,1,1,1],
-    [of,20,0,of+st,20,20,10,1,1,1], // upper must turn
+    [0,0,0,of,20,5,10,1,1,1],
+    [of,20,5,of+st,20,20,10,1,1,1],
     [of+st,20,20,of+st,0,0,10,1,1,1],
-    [of+st,0,0,of+st+st+st,-40,-40,20,1,1,1],
-    [of+st+st,-20,-20,of+st,-40,-40,10,1,1,1],
-    [of+st,-40,-40,of+st+st+st,-80,-80,20,1,1,1],
+    [of+st,0,0,of+3*st,-40,-40,20,1,1,1],
+    [of+2*st,-20,-20,of+st,-40,-40,10,1,1,1],
+    [of+st,-40,-40,of+3*st,-80,-80,20,1,1,1],
     [of+st,-40,-40,of,-20,-20,10,1,1,1],
-    [of+st+st,-60,-60,of+st,-80,-80,10,1,1,1],
-    [of+st,-80,-80,of,-80,-60,10,1,1,1], // upper must turn
+    [of+2*st,-60,-60,of+st,-80,-80,10,1,1,1],
+    [of+st,-80,-80,of,-80,-60,10,1,1,1],
     [of,-80,-60,of,-180,-180,50,1,1,1],
-    [of,-160,-160,of+st+st+st,-160,-140,30,1,1,1], // upper must turn
-    [of+st+st+st,-160,-140,of+st+st+st,-140,-140,10,1,1,1],
-    [of+st+st+st,-140,-140,of+st+st/2,-110,-110,15,1,1,1],
+    [of,-160,-160,of+3*st,-160,-140,30,1,1,1],
+    [of+3*st,-160,-140,of+3*st,-140,-140,10,1,1,1],
+    [of+3*st,-140,-140,of+2*st/2,-110,-110,15,1,1,1],
     [of+st,20,20,of+st,40,40,10,1,1,1],
     [of+st,40,40,of,60,60,10,1,1,1],
     [of,60,60,of+st,80,80,10,1,1,1],
-    [of+st,80,80,of+st+st,80,60,10,1,1,1], // upper must turn
-    [of+st+st,80,80,of+st+st,60,60,10,1,1,1],
-    [of+st+st,60,60,of+st+st+st,40,40,10,1,1,1],
-    [of+st+st,80,80,of+st+st,100,100,10,1,1,1],
-    [of+st+st,100,100,of+st,120,120,10,1,1,1],
-    [of+st,120,120,of+st+st+st,160,160,10,1,1,1],
-    [of+st,120,120,of,120,140,10,1,1,1], // upper must turn
+    [of+st,80,80,of+2*st,80,60,10,1,1,1],
+    [of+2*st,80,80,of+2*st,60,60,10,1,1,1],
+    [of+2*st,60,60,of+3*st,40,40,10,1,1,1],
+    [of+2*st,80,80,of+2*st,100,100,10,1,1,1],
+    [of+2*st,100,100,of+st,120,120,10,1,1,1],
+    [of+st,120,120,of+3*st,160,160,10,1,1,1],
+    [of+st,120,120,of,120,140,10,1,1,1],
     [of,120,140,of,140,140,10,1,1,1],
-    [of,140,140,of+st+st/2,170,170,15,1,1,1],
-    //[tra*0.9,360*0.9,360*0.9,tra,360*0.9,360,5,1,1,1],
+    [of,140,140,of+2*st/2,170,170,15,1,1,1],
+    [of+st,160,160,of,180,180,15,1,1,1],
 ];
-
-/*difference(){
-    cylinder(r=outer_d/2-9*scl-4*tol,h=layer_h);
-    cylinder(r=outer_d/2-9*scl-8*tol,h=layer_h);
-}*/
-//translate([outer_d/2-9*scl-4*tol,0,0])rotate([0,45,0])cube(2*scl);
-//translate([outer_d/2-9*scl-8*tol,0,0])rotate([0,180+45,0])cube(2*scl);
-
-/*translate([0,0,layer_h])rotate_extrude(){
-    translate([outer_d/2-9*scl-4*tol,0,0])rotate(-45)square(3*scl);
-    translate([outer_d/2-9*scl-8*tol,0,0])rotate(-180-45)square(3*scl);
-}*/
 
 // central shafts
 if(true){
