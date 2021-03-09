@@ -4,7 +4,7 @@
 // Licensed under a Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0) license, http://creativecommons.org/licenses/by-sa/4.0.
 
 // Which one would you like to see?
-part = "box"; // [box:Box,lower:Lower Half,upper:Upper Half,core:Core]
+part = "core"; // [box:Box,lower:Lower Half,upper:Upper Half,core:Core]
 
 // Use for command line option '-Dgen=n', overrides 'part'
 // 0-7+ - generate parts individually in assembled positions. Combine with MeshLab.
