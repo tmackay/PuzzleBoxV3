@@ -4,7 +4,7 @@
 // Licensed under a Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0) license, http://creativecommons.org/licenses/by-sa/4.0.
 
 // Which one would you like to see?
-part = "upper"; // [box:Box,lower:Lower Half,upper:Upper Half,core:Core,tool:Key Tool,joiner:Joiner]
+part = "box"; // [box:Box,lower:Lower Half,upper:Upper Half,core:Core,tool:Key Tool,joiner:Joiner]
 
 // Use for command line option '-Dgen=n', overrides 'part'
 // 0-7+ - generate parts individually in assembled positions. Combine with MeshLab.
@@ -22,27 +22,17 @@ cube_w_ = 76.2;
 cube_w = cube_w_*scl;
 
 // Number of planet gears in inner circle
-planets = 5; //[3:1:21]
+//planets = 5; //[3:1:21]
+
+// Pegs to navigate labyrinth
+pegs=2;
 
 // Height of planetary layers (layer_h will be subtracted from gears>0). Non-uniform heights will reveal bugs.
-gh_ = 6.8*[1, 1, 1, 1, 1, 1];
+gh_ = 8*[1, 1, 1, 1, 1, 1];
 gh = scl*gh_;
 // Modules, planetary layers
 modules = len(gh); //[2:1:3]
 
-// Number of teeth in planet gears
-pt = [5, 6, 7, 7, 7, 7];
-// For additional gear ratios we can add or subtract extra teeth (in multiples of planets) from rings but the profile will be further from ideal
-of = [0, 0, 1, 0, 0, 0];
-// number of teeth to twist across
-nt = pt/pt[0];
-// Sun gear multiplier
-sgm = 2; //[1:1:5]
-// For fused sun gears, we require them to be a multiple of the planet teeth
-dt = pt*sgm;
-// Find closest ring gear to ideal
-// and add offset
-rt = [for(i=[0:modules-1])round((2*dt[i]+2*pt[i])/planets+of[i])*planets-dt[i]];
 // Outer diameter of core
 outer_d_ = 40.5; //[30:0.2:300]
 // +9/2
@@ -55,12 +45,6 @@ wall = scl*wall_;
 Negative = 0;				// [1:No, 0.5:Yes, 0:Half]
 // Simplified model without gears
 draft = 0; // [0:No, 1:Yes]
-
-// Calculate cp based on desired ring wall thickness
-cp=(outer_d/2-wall)*360/(dt+2*pt);
-
-// what ring should be for teeth to mesh without additional scaling
-rtn = dt+2*pt;
 
 // Shaft diameter
 shaft_d_ = 6; //[0:0.1:25]
@@ -112,35 +96,7 @@ $fs = 1/1;
 // Curve resolution settings, number of segments
 $fn=96;
 
-// Planetary gear ratio for fixed ring: 1:1+R/S
-//echo(str("Gear ratio of first planetary stage: 1:", 1+ring_t1/drive_t));
-
-// (Planet/Ring interaction: Nr*wr-Np*wp=(Nr-Np)*wc)
-// one revolution of carrier (wc=1) turns planets on their axis
-// wp = (Np-Nr)/Np = eg. (10-31)/10=-2.1 turns
-// Secondary Planet/Ring interaction
-// wr = ((Nr-Np)+Np*wp)/Nr = eg. ((34-11)-11*2.1)/34 = 1/340
-// or Nr2/((Nr2-Np2)+Np2*(Np1-Nr1)/Np1)
-//echo(str("Gear ratio of planet/ring stage: 1:", abs(ring_t2/((ring_t2-planet_t2)+planet_t2*(planet_t-ring_t1)/planet_t)))); // eg. 3.8181..
-
-// Final gear ratio is product of above, eg. 1:1298.18..
-//echo(str("Input/Output gear ratio: 1:",abs((1+ring_t1/drive_t)*ring_t2/((ring_t2-planet_t2)+planet_t2*(planet_t-ring_t1)/planet_t))));
-
-// sanity check
-for (i=[0:modules-1]){
-    if ((dt[i]+rt[i])%planets)
-        echo(str("Warning: For even spacing, planets (", i, ") must divide ", dt[i]+rt[i]));
-    if (dt[i] + 2*pt[i] != rt[i])
-        echo(str("Teeth fewer than ideal (ring", i, "): ", dt[i]+2*pt[i]-rt[i]));
-    if(i<modules-1)echo(str("Input/Output gear ratio (ring", i, "): 1:",abs((1+rt[modules-1]/dt[modules-1])*rt[i]/((rt[i]-pt[i])+pt[i]*(pt[modules-1]-rt[modules-1])/pt[modules-1]))));
-    if(i<modules-1)echo(str("Input/Output gear ratio (ring", i, "): 1:","(1+",rt[modules-1],"/",dt[modules-1],")*",rt[i],"/(",(rt[i]-pt[i]),pt[i]*(pt[modules-1]-rt[modules-1]),"/",pt[modules-1],")"));
-}
-
-// if(pt[modules-1]*(rt[i]-pt[i]) != pt[i]*(rt[modules-1]-pt[modules-1]))
-// find the first inf gear ratio (midpoint)
-mid = search(0,[for (i=[0:modules-1]) pt[modules-1]*(rt[i]-pt[i])-pt[i]*(rt[modules-1]-pt[modules-1])])[0];
-
-g=addl([for(i=[0:modules-1])(dt[i]+rt[i])%planets],modules)?99:gen;
+g=gen;
 
 // Calibration cube (invalid input)
 if (g==99) {
@@ -159,59 +115,9 @@ r=1*scl+outer_d/2-4*tol;
 h=core_h2;
 d=h/4;
 
-// core tool - for demonstration
-if(g==undef&&part=="tool"){
-    // TODO: use of tol for vertical clearances - use multiple of layer_h instead
-    translate([0,0,core_h2-cube_w/2-gh[0]-AT])cylinder(d=r,h=gh[0]+AT);
-    translate([0,0,core_h2-cube_w/2-AT])cylinder(d=shaft_d-2*tol,h=gh[0]+ST);
-    
-    // outer teeth
-    intersection(){
-        r=(shaft_d+outer_w/sqrt(2))/2-2*tol;
-        r1=shaft_d/2-2*tol;
-        h=gh[0]/2;
-        d=teeth_a2*outer_w;
-        dz=d/sqrt(3);
-        translate([0,0,core_h2+gh[0]/2-cube_w/2])rotate_extrude()
-            polygon(points=[[0,0],[r1,0],[r1+d,dz],[r1+d,h-dz],[r1,h],[0,h]]);
-        for(j = [0:1])rotate([0,0,180*j])
-            translate([r,0,core_h2+gh[0]/2-cube_w/2])scale([2,1,1])rotate([0,0,45])
-                cylinder(d=outer_w-4*tol,h=core_h+core_h2+tol+ST,$fn=4);
-    }
-}
-
-module mir(){
-    children();
-    mirror([0,0,1])children();
-}
-
-// Joiner
-/*if(false||g==undef&&part=="joiner"){
-    mir()difference(){
-        rotate_extrude()polygon(points=[
-    [outer_d/2-4*scl-d/2-2*tol,-d-4*scl],[outer_d/2-2*scl-d/2-2*tol,-d-4*scl],[outer_d/2-2*scl-2*tol,-d/2-4*scl],[outer_d/2-2*scl-2*tol,-d/2-2*scl],[outer_d/2-2*scl-d/2-2*tol,-2*scl],[outer_d/2-2*scl-d/2-2*tol,0],[outer_d/2-4*scl-d/2-2*tol,0]
-        ]);
-        //cube([2*(outer_d/2-2*scl-d/2-2*tol),outer_d-4*scl-4*tol,core_h],center=true);
-        translate([0,0,TT])mirror([0,0,1]){
-            translate(-[outer_d/2+2*scl-d/2-2*tol,outer_d/2,0])
-                cube([4*scl,outer_d,d+4*scl+AT]);
-            rotate(-45)cube([outer_d,outer_d,d+4*scl+AT]);
-        }
-    }
-    
-}*/
-
-if(false||g==undef&&part=="joiner"){
-    mir()intersection(){
-        rotate_extrude()polygon(points=[
-            [outer_d/2-4*scl-d/2-2*tol,2*scl-d-4*scl],[0,2*scl-d-4*scl],[0,-d-4*scl],
-            [outer_d/2-4*scl-d/2-2*tol,-d-4*scl],[outer_d/2-2*scl-d/2-2*tol,-d-4*scl],[outer_d/2-2*scl-d/2-2*tol,-d-4*scl],[outer_d/2-2*scl-2*tol,-d/2-4*scl],[outer_d/2-2*scl-2*tol,-d/2-2*scl],[outer_d/2-2*scl-d/2-2*tol,-2*scl],[outer_d/2-2*scl-d/2-2*tol,0],[outer_d/2-4*scl-d/2-2*tol,0]
-         ]);
-        cube([outer_d-12*scl-d-4*tol,outer_d-4*scl-4*tol,core_h],center=true);
-    }
-}
-
-
+// diameter of core fins, smaller allows assembly
+//fin=cube_w/2-2*scl-2*tol;
+fin=outer_d/2+6*scl;
 
 
 // Box
@@ -235,57 +141,9 @@ module lamenthalf(turns=false){
             //translate([0,0,-cube_w/2])
                 //cylinder(r=outer_d/2+teeth_a*outer_w, h=1*scl+AT);
 
-// cylinder with recess for locking teeth
-difference(){
-    translate([0,0,-cube_w/2])
-        difference(){
-            cylinder(d=outer_d,h=core_h2-layer_h,$fn=96);
-            // centre hole
-            //translate([0,0,-TT])cylinder(d=10*scl,h=core_h2-layer_h+AT,$fn=96);
-            //translate([0,0,3*scl])cylinder(d=6.5*scl,h=core_h2-layer_h+AT,$fn=96);
-            translate([0,0,-TT])cylinder(d=3*scl,h=core_h2-layer_h+AT,$fn=24);
-            //rotate(90+45/4)translate([0,3*scl+tol,core_h2-3*scl])mirror([0,1,1])cylinder(r=3*scl+tol,h=3*scl+2*tol,center=true,$fn=24);
-        }
-    // slots for latch movement
-    intersection(){
-        translate([0,0,-cube_w/2])
-            cylinder(d=outer_d+tol,h=core_h2-layer_h-2*scl+2*tol,$fn=96);
-        translate([0,0,core_h2-layer_h-6*scl-cube_w/2]){
-            r=(outer_d+outer_w/sqrt(2))/2+2*tol;
-            r1=outer_d/2;
-            e=r1-sqrt(r1*r1-pow(1.5*scl+2*tol,2));
-            h=core_h+core_h2-2*scl-cube_w/2;
-            d=cube_w/2-r1-2*scl;
-            dz=d/sqrt(3);
-            for(j=[1:8])rotate(j*360/8+45/4)translate([r1-4*scl-e,0,0])mirror([0,1,1]){
-                cylinder(r=core_h2-layer_h-ld*scl+2*tol,h=3*scl+8*tol,center=true);
-                // extra clearance in direction magnets pull
-                //translate([-2*tol,0,0])cylinder(r=core_h2-layer_h-ld*scl+2*tol,h=3*scl+8*tol,center=true);
-            }
-        }
-    }
-    // holes for magnet insertion
-    difference(){
-        for(j=[1:8])hull()mir()translate([0,0,core_h2-layer_h-6*scl-cube_w/2]){
-            r=(outer_d+outer_w/sqrt(2))/2+2*tol;
-            r1=outer_d/2;
-            e=r1-sqrt(r1*r1-pow(1.5*scl+2*tol,2));
-            h=core_h+core_h2-2*scl-cube_w/2;
-            d=cube_w/2-r1-2*scl;
-            dz=d/sqrt(3);
-            rotate(j*360/8+45/4)translate([r1-4*scl-e,0,0])mirror([0,1,1])
-                rotate(115)translate([0,core_h2-layer_h-ld*scl-3*scl-5*tol,0])
-                    cylinder(r=3*scl+tol,h=3*scl+2*tol,center=true,$fn=24);
-        }
-        // supporting layer
-        //translate([0,0,core_h2-9*layer_h-cube_w/2])cylinder(d=outer_d,h=layer_h,$fn=96);
-    }
-    //temporary secton
-    //rotate(45/4)translate([0,-cube_w/2,0])cube(cube_w+AT,center=true);
-}
-
-            //translate([0,0,-cube_w/2])
-                //cylinder(d=outer_d,h=core_h2-tol,$fn=96);
+            translate([0,0,-cube_w/2])
+                cylinder(d=outer_d,h=core_h2-tol,$fn=96);
+            
             for (i=[0:2:15]){
                 difference(){
                     intersection(){
@@ -337,10 +195,10 @@ difference(){
 
         // Dial spool track
         // TODO: parameterise dial diameter and hard coded offsets, scope global variables
-        //translate([0,0,-cube_w/2])rotate_extrude()
-            //polygon( points=[
-                //[r,-AT],[r,1*scl],[r-2.5*d,2*d],[r-2.5*d,h-1.5*d],[r-d,h-1*scl],[r-d,h+AT],[r-d-2*tol,h+AT],
-                //[r-d-2*tol,h-1*scl],[r-2.5*d-2*tol,h-1.5*d],[r-2.5*d-2*tol,2*d],[r-2*tol,1*scl],[r-2*tol,-AT]]);
+        translate([0,0,-cube_w/2])rotate_extrude()
+            polygon( points=[
+                [r,-AT],[r,1*scl],[r-2.5*d,2*d],[r-2.5*d,h-1.5*d],[r-d,h-1*scl],[r-d,h+AT],[r-d-2*tol,h+AT],
+                [r-d-2*tol,h-1*scl],[r-2.5*d-2*tol,h-1.5*d],[r-2.5*d-2*tol,2*d],[r-2*tol,1*scl],[r-2*tol,-AT]]);
         //translate([0,0,-cube_w/2])rotate_extrude()
             //polygon( points=[
                 //[r,-AT],[r,2*scl],[r+d,1.5*d],[r+d,1.5*d+2*scl],[r-d,h-2*scl],[r-d,h+AT],[r-d-2*tol,h+AT],
@@ -367,10 +225,10 @@ difference(){
             r=(outer_d+outer_w/sqrt(2))/2+2*tol;
             r1=outer_d/2+2*tol;
             h=core_h+core_h2-2*scl;
-            d=cube_w/2-r1-2*scl;
+            d=fin-r1;
             dz=d/sqrt(3);
             rotate_extrude()
-                polygon(points=[[r1-d-AT,0],[r1,0],[r1+d,dz],[r1+d,h-dz],[r1,h],[r1-d-AT,h]]);
+                polygon(points=[[r1-d-AT,2*scl],[r1,2*scl],[r1+d,dz+2*scl],[r1+d,h-dz],[r1,h],[r1-d-AT,h]]);
             // outer teeth
             for(j = [1:8]){
                 intersection(){
@@ -444,62 +302,207 @@ difference(){
                 }
             }*/
     
-// locking teeth
-r1=outer_d/2;
-e=r1-sqrt(r1*r1-pow(1.5*scl+2*tol,2));
-la=0;
-for(j=[1:8])
-translate([0,0,core_h2-layer_h-6*scl-cube_w/2])rotate(j*360/8+45/4)translate([r1-4*scl-e,0,0])
-rotate([0,-la,0])
-translate(-[r1-4*scl-e,0,0])rotate(-j*360/8-45/4)translate(-[0,0,core_h2-layer_h-6*scl-cube_w/2])
-intersection(){
-    translate([0,0,-cube_w/2])rotate_extrude(){
-        translate([r1-4*scl,core_h2-layer_h-6*scl])circle(r=4*scl);
-        difference(){
-            square([r1,core_h2-layer_h-2*scl]);
-            translate([r1-4*scl,core_h2-layer_h-6*scl])square([4*scl,4*scl]);
-        }
-    }
-    translate([0,0,core_h2-layer_h-6*scl-cube_w/2]){
-        r=(outer_d+outer_w/sqrt(2))/2+2*tol;
-        h=core_h+core_h2-2*scl-cube_w/2;
-        d=cube_w/2-r1-2*scl;
-        dz=d/sqrt(3);        
-        // outer teeth
-        rotate(j*360/8+45/4)translate([r1-4*scl-e,0,0])mirror([0,1,1]){
-            difference(){
-                cylinder(r=core_h2-layer_h-ld*scl,h=3*scl+4*tol+AT,center=true);
-                cylinder(r=2*scl+2*tol,h=3*scl+4*tol+ST,center=true,$fn=24);
-                // hole for magnet
-                rotate(115)translate([0,core_h2-layer_h-ld*scl-3*scl-5*tol,0])
-                    cylinder(r=3*scl+tol/2,h=3*scl,center=true,$fn=24);
-            }
-            cylinder(r=2*scl,h=3*scl+8*tol+2*AT,center=true,$fn=24);
-            // bridge helpers
-            intersection(){
-                difference(){
-                    cylinder(r=core_h2-layer_h-ld*scl,h=3*scl+8*tol+AT,center=true);
-                    cylinder(r=core_h2-layer_h-ld*scl-layer_h,h=3*scl+8*tol+ST,center=true);
-                }
-                mirror([0,1,1])translate(-[r1-4*scl-e,0,0])rotate(-j*360/8-45/4)
-                translate(-[0,0,core_h2-layer_h-5*scl-cube_w/2])
-                translate([0,0,core_h2-layer_h-5*scl-cube_w/2])rotate(j*360/8+45/4)translate([r1-4*scl-e,0,0])
-                rotate([0,la,0])
-                translate(-[r1-4*scl-e,0,0])rotate(-j*360/8-45/4)translate(-[0,0,core_h2-layer_h-5*scl-cube_w/2])
-                    translate([0,0,-cube_w/2])difference(){
-                        cylinder(d=outer_d,h=core_h2-layer_h,$fn=96);
-                        cylinder(d=outer_d-20*scl,h=core_h2-layer_h,$fn=96);
-                    }
-            }
-            
-        }
-    }
-}
+
             
             //rotate(90-360/16+360/8+45/2)
                 //translate([0,2*scl+2*tol,-cube_w/2])cube([cube_w,3*scl,core_h2-layer_h]);
 
 }
+
+module mir(){
+    children();
+    mirror([1,0,0])mirror([0,0,1])children();
+}
+
+// travel of inner slider
+tra=core_h/2-2.5*scl-2*layer_h;
+
+// Core
+if(true||g==1||g==undef&&part=="core"){
+    difference(){
+        // positive volume
+        union(){
+            
+            mir()intersection(){
+                r=(outer_d+outer_w/sqrt(2))/2+2*tol;
+                r1=outer_d/2;
+                h=core_h+core_h2-2*scl-cube_w/2;
+                d=fin-r1-2*tol;
+                dz=d/sqrt(3);
+                rotate_extrude()
+                    polygon(points=[[r1-d-AT,2*scl],[r1,2*scl],[r1+d,dz+2*scl],[r1+d,h-dz],[r1,h],[r1-d-AT,h]]);
+                // outer teeth
+                for(j = [1:8]){
+                    intersection(){
+                        rotate(-90+j*360/8+360/16)
+                            translate([0,2*scl+2*tol,0])mirror([1,0,0])cube([4*r1+d+AT,r1+d+AT,h]);
+                        rotate(90-360/16+j*360/8+360/16)
+                            translate([0,2*scl+2*tol,0])cube([4*r1+d+AT,r1+d+AT,h]);
+                    }
+                }
+            }
+
+            translate([0,0,core_h2-cube_w/2])
+                cylinder(r=outer_d/2,h=core_h);
+               
+        }
+        // negative volume
+        
+        // spinning fins
+        rotate_extrude(convexity=5)
+            polygon(points=[[outer_d/2+2*scl,core_h/2-2*scl+layer_h],[outer_d/2,core_h/2-2*scl+layer_h],[outer_d/2-2*scl,core_h/2-2*scl-2*scl/sqrt(3)+layer_h],[outer_d/2-2*scl,2*scl/sqrt(3)+2*scl-layer_h],[outer_d/2,2*scl-layer_h],[outer_d/2+2*scl,2*scl-layer_h],[outer_d/2+2*scl,2*scl-2*layer_h],[outer_d/2-tol,2*scl-2*layer_h],[outer_d/2-2*scl-2*tol,2*scl/sqrt(3)+2*scl-layer_h],[outer_d/2-2*scl-2*tol,core_h/2-2*scl-2*scl/sqrt(3)+layer_h],[outer_d/2-tol,core_h/2-2*scl+2*layer_h],[outer_d/2+2*scl,core_h/2-2*scl+2*layer_h]]);
+
+        // slider tracks
+        translate([0,0,-core_h/2])intersection(){
+            rotate_extrude(convexity=5)
+                polygon(points=[[outer_d/2-7*scl,4*scl+tra+2*scl],[outer_d/2-5*scl,4*scl+tra+2*scl],[outer_d/2-3*scl,4*scl+tra+2*scl-2*scl/sqrt(3)],[outer_d/2-3*scl,2*scl/sqrt(3)+2*scl],[outer_d/2-5*scl,2*scl],[outer_d/2-7*scl,2*scl]]);
+            for(j = [1:8]){
+                rotate(j*360/8+360/16+360/32)
+                    translate([0,-2*scl-2*tol,0])cube([outer_d/2,4*scl+4*tol,core_h]);
+            }
+        }
+
+        // payload
+        translate([0,0,core_h2-cube_w/2-TT])
+            cylinder(r=outer_d/2-5*scl,h=core_h+AT);
+        
+        // tapered bottom
+        translate([0,0,-core_h/2])rotate_extrude(){
+            translate([outer_d/2-2.5*scl+2*tol,0,0])rotate(-45)square(3*scl);
+            translate([outer_d/2-2.5*scl-2*tol,0,0])rotate(-180-45)square(3*scl);
+        }
+    }
+    
+}
+
+// Inner slider
+if(true){
+    translate([0,0,core_h2-cube_w/2])difference(){
+        cylinder(r=outer_d/2-5*scl-2*tol,h=core_h/2+2.5*scl);
+        translate([0,0,-TT])cylinder(r=outer_d/2-7*scl-2*tol,h=core_h/2+2.5*scl+AT);
+            
+        // tapered bottom
+        translate([0,0,0])rotate_extrude(){
+            translate([outer_d/2-7*scl+2*tol,0,0])rotate(-45)square(3*scl);
+            translate([outer_d/2-7*scl-2*tol,0,0])rotate(-180-45)square(3*scl);
+        }
+    }
+
+    // slider teeth
+    translate([0,0,-core_h/2])intersection(){
+        rotate_extrude(convexity=5)
+            polygon(points=[[outer_d/2-6*scl-2*tol,4*scl+2*scl],[outer_d/2-5*scl-2*tol,4*scl+2*scl],[outer_d/2-3*scl-2*tol,4*scl+2*scl-2*scl/sqrt(3)],[outer_d/2-3*scl-2*tol,2*scl/sqrt(3)+2*scl],[outer_d/2-5*scl-2*tol,2*scl],[outer_d/2-6*scl-2*tol,2*scl]]);
+        for(j = [1:8]){
+            rotate(j*360/8+360/16+360/32)
+                translate([0,-2*scl,0])cube([outer_d/2,4*scl,core_h/2+2*scl]);
+        }
+    }
+    
+    // maze teeth
+    for(j=[0:pegs-1],k=[0:1])rotate(j*360/pegs)
+        translate([outer_d/2-7*scl-2*tol+AT,0,k?-layer_h:2.5*scl+layer_h-core_h/2])
+            mirror([1,0,1])cylinder(r1=2.5*scl,r2=0.5*scl,h=2*scl+AT,$fn=24);
+}
+
+// (translate,rotate) start, finish, steps, power
+// it, ir1, ir2, t, r1, r2, s, pt, pr1, pr2
+
+of=7.5*scl+2*layer_h; // initial offset, once engaged
+st=(tra-of)/3;
+
+maze=[
+    [0,0,0,of,40,0,10,1,1,1],
+    [of,40,0,of+st,40,40,10,1,1,1],
+    [of+st,40,40,of+2*st,80,40,10,1,1,1],
+    [of+2*st,80,40,of+3*st,80,80,10,1,1,1],
+    [of+3*st,80,80,of+2*st,120,80,10,1,1,1],
+    [of+2*st,120,80,of+st,120,120,10,1,1,1],
+    [of+st,120,120,of,160,120,10,1,1,1],
+    [of,160,120,of+st,160,160,10,1,1,1],
+    [of+st,160,160,of+2*st,200,160,10,1,1,1],
+];
+
+// central shafts
+if(true){
+    difference(){
+        translate([0,0,core_h2-cube_w/2-layer_h-AT])
+            cylinder(r=outer_d/2-7*scl-4*tol,h=core_h/2+2.5*scl+layer_h+AT);
+        // maze path
+        for(j=[0:pegs-1],k=[0:1],l=[0:len(maze)-1])
+            path(maze[l][0],maze[l][1],maze[l][3],maze[l][4],maze[l][6],maze[l][7],maze[l][9])rotate(j*360/pegs)
+                translate([outer_d/2-7*scl-4*tol+AT,0,k?-layer_h:2.5*scl+layer_h-core_h/2])
+                    mirror([1,0,1])cylinder(r1=2.5*scl,r2=0.5*scl,h=2*scl+AT,$fn=24);
+    }
+
+    // post
+    translate([0,0,2.5*scl-TT])cylinder(r=outer_d/2-11*scl-10*tol,h=10*scl+AT);
+    // key
+    translate([0,0,6.5*scl-layer_h])intersection(){
+        rotate_extrude(convexity=5)
+            polygon(points=[
+    [outer_d/2-12*scl-10*tol,4*scl+2*scl],
+    [outer_d/2-11*scl-10*tol,4*scl+2*scl],
+    [outer_d/2-9*scl-10*tol,6*scl-2*scl/sqrt(3)],
+    [outer_d/2-9*scl-10*tol,2*scl/sqrt(3)+2*scl],
+    [outer_d/2-11*scl-10*tol,2*scl],
+    [outer_d/2-12*scl-10*tol,2*scl]]);
+        for(j=[0:3]){
+            rotate((j?j*360/3:180)+360/16+360/32+180)
+                translate([outer_d/4,0,core_h/4+scl])cube([outer_d/2,(j<3?4:6)*scl,core_h/2+2*scl],center=true);
+        }
+    }
+
+    rotate(180)difference(){
+        translate([0,0,2.5*scl+layer_h])cylinder(r=outer_d/2-7*scl-4*tol,h=core_h/2-2.5*scl-layer_h+layer_h+AT);
+        
+        // maze path
+        for(j=[0:pegs-1],k=[0:1],l=[0:len(maze)-1])
+            path(maze[l][0],maze[l][2],maze[l][3],maze[l][5],maze[l][6],maze[l][7],maze[l][9])rotate(j*360/pegs)
+                translate([outer_d/2-7*scl-4*tol+AT,0,k?-layer_h:2.5*scl+layer_h-core_h/2])
+                    mirror([1,0,1])cylinder(r1=2.5*scl,r2=0.5*scl,h=2*scl+AT,$fn=24);
+        // socket
+        translate([0,0,2.5*scl-TT])cylinder(r=outer_d/2-11*scl-8*tol,h=10*scl+2*tol+TT);
+        translate([0,0,6.5*scl-layer_h])
+            rotate_extrude(convexity=5)
+                    polygon(points=[
+            [outer_d/2-12*scl-8*tol,4*scl+2*scl],
+            [outer_d/2-11*scl-8*tol,4*scl+2*scl],
+            [outer_d/2-9*scl-8*tol,4*scl+2*scl-2*scl/sqrt(3)],
+            [outer_d/2-9*scl-8*tol,2*scl/sqrt(3)+2*scl],
+            [outer_d/2-11*scl-8*tol,2*scl],
+            [outer_d/2-12*scl-8*tol,2*scl]]);
+        translate([0,0,2.5*scl])intersection(){
+            rotate_extrude(convexity=5)
+                    polygon(points=[
+            [outer_d/2-12*scl-8*tol,10*scl-layer_h],
+            [outer_d/2-11*scl-8*tol,10*scl-layer_h],
+            [outer_d/2-9*scl-8*tol,10*scl-2*scl/sqrt(3)-layer_h],
+            [outer_d/2-9*scl-8*tol,-TT],
+            [outer_d/2-11*scl-8*tol,-TT],
+            [outer_d/2-12*scl-8*tol,-TT]]);
+            for(j=[0:3]){
+                rotate((j?j*360/3:180)+360/16+360/32)
+                    translate([outer_d/4,0,core_h/4+scl])cube([outer_d/2,(j<3?4:6)*scl+4*tol,core_h/2+2*scl],center=true);
+            }
+        }
+        
+        // tapered bottom
+        translate([0,0,2.5*scl+layer_h])rotate_extrude(){
+            translate([outer_d/2-9*scl-4*tol,0,0])rotate(-45)square(3*scl);
+            translate([outer_d/2-9*scl-8*tol,0,0])rotate(-180-45)square(3*scl);
+        }
+        
+    }
+}
+
+// cut a path segment, translate t, rotate r over s steps
+module path(it=0,ir=0,t=0,r=0,s=0,pt=1,pr=1){
+    translate([0,0,it])rotate(ir)if(s)for(i=[1:s])hull(){
+        translate([0,0,(t-it)*pow(i/s,pt)])rotate((r-ir)*pow(i/s,pr))children();
+        translate([0,0,(t-it)*pow((i-1)/s,pt)])rotate((r-ir)*pow((i-1)/s,pr))children();
+    }else children();
+}
+
 
 //pinhole(r=outer_d/2-2*scl,l=core_h/8,nub=core_h/32,fixed=false,fins=false);
 
