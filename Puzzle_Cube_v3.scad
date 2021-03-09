@@ -4,7 +4,7 @@
 // Licensed under a Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0) license, http://creativecommons.org/licenses/by-sa/4.0.
 
 // Which one would you like to see?
-part = "core"; // [box:Box,lower:Lower Half,upper:Upper Half,core:Core]
+part = "box"; // [box:Box,lower:Lower Half,upper:Upper Half,core:Core]
 
 // Use for command line option '-Dgen=n', overrides 'part'
 // 0-7+ - generate parts individually in assembled positions. Combine with MeshLab.
@@ -172,7 +172,7 @@ module lament(){
                     translate([outer_d/4,0,core_h/4+scl])cube([outer_d/2,(j<3?4:6)*scl,core_h/2+2*scl],center=true);
             }
         }
-    
+
         rotate(180)difference(){
             translate([0,0,2.5*scl+layer_h])cylinder(r=outer_d/2-7*scl-4*tol,h=core_h/2-2.5*scl-layer_h+layer_h+AT);
             
@@ -206,13 +206,13 @@ module lament(){
                         translate([outer_d/4,0,core_h/4+scl])cube([outer_d/2,(j<3?4:6)*scl+4*tol,core_h/2+2*scl],center=true);
                 }
             }
-            
             // tapered bottom
-            translate([0,0,2.5*scl+layer_h])rotate_extrude(){
-                translate([outer_d/2-9*scl-4*tol,0,0])rotate(-45)square(3*scl);
-                translate([outer_d/2-9*scl-8*tol,0,0])rotate(-180-45)square(3*scl);
+            translate([0,0,2.5*scl+layer_h])rotate_extrude()scale([1,3/4,1]){
+                translate([outer_d/2-9*scl-5*tol+AT,layer_h*4/3,0])rotate(-45)square(5*scl);
+                translate([outer_d/2-9*scl-7*tol,layer_h*4/3,0])rotate(-180-45)square(5*scl);
+                translate([outer_d/2-9*scl-5*tol+AT,0,0])square(layer_h*4/3);
+                translate([outer_d/2-9*scl-7*tol,0,0])rotate(90)square(layer_h*4/3);
             }
-            
         }
     }
 }
@@ -322,12 +322,13 @@ if(false||g==1||g==undef&&part=="core"){
             cylinder(r=outer_d/2-5*scl,h=core_h+AT);
         
         // tapered bottom
-        translate([0,0,-core_h/2])rotate_extrude(){
-            translate([outer_d/2-2.5*scl+2*tol,0,0])rotate(-45)square(3*scl);
-            translate([outer_d/2-2.5*scl-2*tol,0,0])rotate(-180-45)square(3*scl);
+        translate([0,0,-core_h/2])rotate_extrude()scale([1,3/4,1]){
+            translate([outer_d/2-2.5*scl+tol+AT,layer_h*4/3,0])rotate(-45)square(3.5*scl);
+            translate([outer_d/2-2.5*scl-tol,layer_h*4/3,0])rotate(-180-45)square(3.5*scl);
+            translate([outer_d/2-2.5*scl+tol+AT,0,0])square(layer_h*4/3);
+            translate([outer_d/2-2.5*scl-tol,0,0])rotate(90)square(layer_h*4/3);
         }
     }
-    
 }
 
 // Inner slider
@@ -337,9 +338,11 @@ if(false||g==1||g==undef&&part=="core"){
         translate([0,0,-TT])cylinder(r=outer_d/2-7*scl-2*tol,h=core_h/2+2.5*scl+AT);
             
         // tapered bottom
-        translate([0,0,0])rotate_extrude(){
-            translate([outer_d/2-7*scl+2*tol,0,0])rotate(-45)square(3*scl);
-            translate([outer_d/2-7*scl-2*tol,0,0])rotate(-180-45)square(3*scl);
+        translate([0,0,0])rotate_extrude()scale([1,3/4,1]){
+            translate([outer_d/2-7*scl+AT,layer_h*4/3,0])rotate(-45)square(5*scl);
+            //translate([outer_d/2-7*scl-2*tol,0,0])rotate(-180-45)square(5*scl);
+            translate([outer_d/2-7*scl+AT,0,0])square(layer_h*4/3);
+            //translate([outer_d/2-7*scl-2*tol,0,0])rotate(90)square(layer_h*4/3);
         }
     }
 
