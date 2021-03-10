@@ -152,7 +152,6 @@ module lament(){
                     translate([outer_d/2-7*scl-4*tol+AT,0,k?-layer_h:2.5*scl+layer_h-core_h/2])
                         mirror([1,0,1])cylinder(r1=2.5*scl,r2=0.5*scl,h=2*scl+AT,$fn=24);
         }
-    
         // post
         translate([0,0,2.5*scl-TT])cylinder(r=outer_d/2-11*scl-10*tol,h=10*scl+AT);
         // key
@@ -176,7 +175,6 @@ module lament(){
         // central shaft
         rotate(180)difference(){
             translate([0,0,2.5*scl+layer_h])cylinder(r=outer_d/2-7*scl-4*tol,h=core_h/2-2.5*scl-layer_h+layer_h+AT);
-            
             // maze path
             for(j=[0:pegs-1],k=[0:1],l=[0:len(maze)-1])
                 path(maze[l][0],maze[l][2],maze[l][3],maze[l][5],maze[l][6],maze[l][7],maze[l][9])rotate(j*360/pegs)
@@ -219,75 +217,6 @@ module lament(){
 }
 
 module lamenthalf(turns=false){
-    // progressive bridging (experimental, rough)
-    /*if(!turns){
-        translate([0,0,layer_h/2-core_h/2])for(i=[0:4:15])hull(){
-            intersection(){
-                rotate([0,0,i*360/16])
-                    translate([cube_w/2+tol,cube_w/2,0])cube(cube_w,center=true);
-                rotate([0,0,(i-1)*360/16])
-                    translate([-cube_w/2-tol,cube_w/2,0])cube(cube_w,center=true);
-                difference(){
-                    cylinder(r=outer_d/2+2*tol+AT,h=layer_h,center=true);
-                    cylinder(r=outer_d/2+2*tol,h=layer_h+AT,center=true);
-                }
-            }
-            intersection(){
-                rotate([0,0,(i+2)*360/16])
-                    translate([cube_w/2+tol,cube_w/2,0])cube(cube_w,center=true);
-                rotate([0,0,(i+1)*360/16])
-                    translate([-cube_w/2-tol,cube_w/2,0])cube(cube_w,center=true);
-                difference(){
-                    cylinder(r=outer_d/2+2*tol+AT,h=layer_h,center=true);
-                    cylinder(r=outer_d/2+2*tol,h=layer_h+AT,center=true);
-                }
-            }
-        }
-        translate([0,0,layer_h/2-core_h/2-layer_h])for(i=[0:4:15])hull(){
-            intersection(){
-                rotate([0,0,i*360/16])
-                    translate([cube_w/2+tol,cube_w/2,0])cube(cube_w,center=true);
-                rotate([0,0,(i-1)*360/16])
-                    translate([-cube_w/2-tol,cube_w/2,0])cube(cube_w,center=true);
-                difference(){
-                    cylinder(r=outer_d/2+2*tol+AT,h=layer_h,center=true);
-                    cylinder(r=outer_d/2+2*tol,h=layer_h+AT,center=true);
-                }
-            }
-            intersection(){
-                rotate([0,0,(i+2)*360/16])
-                    translate([cube_w/2+tol,cube_w/2,0])cube(cube_w,center=true);
-                rotate([0,0,(i+1)*360/16])
-                    translate([-cube_w/2-tol,cube_w/2,0])cube(cube_w,center=true);
-                difference(){
-                    cylinder(r=outer_d/2+2*tol+AT,h=layer_h,center=true);
-                    cylinder(r=outer_d/2+2*tol,h=layer_h+AT,center=true);
-                }
-            }
-        }
-        translate([0,0,layer_h/2-core_h/2-layer_h])for(i=[2:4:15])hull(){
-            intersection(){
-                rotate([0,0,i*360/16])
-                    translate([cube_w/2+tol,cube_w/2,0])cube(cube_w,center=true);
-                rotate([0,0,(i-1)*360/16])
-                    translate([-cube_w/2-tol,cube_w/2,0])cube(cube_w,center=true);
-                difference(){
-                    cylinder(r=outer_d/2+2*tol+AT,h=layer_h,center=true);
-                    cylinder(r=outer_d/2+2*tol,h=layer_h+AT,center=true);
-                }
-            }
-            intersection(){
-                rotate([0,0,(i+2)*360/16])
-                    translate([cube_w/2+tol,cube_w/2,0])cube(cube_w,center=true);
-                rotate([0,0,(i+1)*360/16])
-                    translate([-cube_w/2-tol,cube_w/2,0])cube(cube_w,center=true);
-                difference(){
-                    cylinder(r=outer_d/2+2*tol+AT,h=layer_h,center=true);
-                    cylinder(r=outer_d/2+2*tol,h=layer_h+AT,center=true);
-                }
-            }
-        }
-    }*/
     difference(){
         union(){
             translate([0,0,-cube_w/2])
@@ -320,7 +249,6 @@ module lamenthalf(turns=false){
             //polygon( points=[
                 //[r,-AT],[r,2*scl],[r+d,1.5*d],[r+d,1.5*d+2*scl],[r-d,h-2*scl],[r-d,h+AT],[r-d-2*tol,h+AT],
                 //[r-d-2*tol,h-2*scl],[r+d-2*tol,1.5*d+2*scl],[r+d-2*tol,1.5*d],[r-2*tol,2*scl],[r-2*tol,-AT]]);
-
         translate([0,0,core_h2-cube_w/2])intersection(){
             r=(outer_d+outer_w/sqrt(2))/2+2*tol;
             r1=outer_d/2+2*tol;
@@ -347,7 +275,6 @@ if(false||g==1||g==undef&&part=="core"){
     difference(){
         // positive volume
         union(){
-            
             mir()intersection(){
                 r=(outer_d+outer_w/sqrt(2))/2+2*tol;
                 r1=outer_d/2;
@@ -366,17 +293,13 @@ if(false||g==1||g==undef&&part=="core"){
                     }
                 }
             }
-
             translate([0,0,core_h2-cube_w/2])
                 cylinder(r=outer_d/2,h=core_h);
-               
         }
         // negative volume
-        
         // spinning fins
         rotate_extrude(convexity=5)
             polygon(points=[[outer_d/2+2*scl,core_h/2-2*scl+layer_h],[outer_d/2,core_h/2-2*scl+layer_h],[outer_d/2-2*scl,core_h/2-2*scl-2*scl/sqrt(3)+layer_h],[outer_d/2-2*scl,2*scl/sqrt(3)+2*scl-layer_h],[outer_d/2,2*scl-layer_h],[outer_d/2+2*scl,2*scl-layer_h],[outer_d/2+2*scl,2*scl-2*layer_h],[outer_d/2-tol,2*scl-2*layer_h],[outer_d/2-2*scl-2*tol,2*scl/sqrt(3)+2*scl-layer_h],[outer_d/2-2*scl-2*tol,core_h/2-2*scl-2*scl/sqrt(3)+layer_h],[outer_d/2-tol,core_h/2-2*scl+2*layer_h],[outer_d/2+2*scl,core_h/2-2*scl+2*layer_h]]);
-
         // slider tracks
         translate([0,0,-core_h/2])intersection(){
             rotate_extrude(convexity=5)
@@ -386,11 +309,9 @@ if(false||g==1||g==undef&&part=="core"){
                     translate([0,-2*scl-2*tol,0])cube([outer_d/2,4*scl+4*tol,core_h]);
             }
         }
-
         // payload
         translate([0,0,core_h2-cube_w/2-TT])
             cylinder(r=outer_d/2-5*scl,h=core_h+AT);
-        
         // tapered bottom
         translate([0,0,-core_h/2])rotate_extrude()scale([1,3/4,1]){
             translate([outer_d/2-2.5*scl+tol+AT,layer_h*4/3,0])rotate(-45)square(3.5*scl);
@@ -406,7 +327,6 @@ if(false||g==1||g==undef&&part=="core"){
     translate([0,0,core_h2-cube_w/2])difference(){
         cylinder(r=outer_d/2-5*scl-2*tol,h=core_h/2+2.5*scl);
         translate([0,0,-TT])cylinder(r=outer_d/2-7*scl-2*tol,h=core_h/2+2.5*scl+AT);
-            
         // tapered bottom
         translate([0,0,0])rotate_extrude()scale([1,3/4,1]){
             translate([outer_d/2-7*scl+AT,layer_h*4/3,0])rotate(-45)square(5*scl);
@@ -415,7 +335,6 @@ if(false||g==1||g==undef&&part=="core"){
             //translate([outer_d/2-7*scl-2*tol,0,0])rotate(90)square(layer_h*4/3);
         }
     }
-
     // slider teeth
     translate([0,0,-core_h/2])intersection(){
         rotate_extrude(convexity=5)
@@ -425,7 +344,6 @@ if(false||g==1||g==undef&&part=="core"){
                 translate([0,-2*scl,0])cube([outer_d/2,4*scl,core_h/2+2*scl]);
         }
     }
-    
     // maze teeth
     for(j=[0:pegs-1],k=[0:1])rotate(j*360/pegs)
         translate([outer_d/2-7*scl-2*tol+AT,0,k?-layer_h:2.5*scl+layer_h-core_h/2])
