@@ -4,7 +4,7 @@
 // Licensed under a Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0) license, http://creativecommons.org/licenses/by-sa/4.0.
 
 // Which one would you like to see?
-part = "core"; // [box:Box,lower:Lower Half,upper:Upper Half,core:Core]
+part = "box"; // [box:Box,lower:Lower Half,upper:Upper Half,core:Core]
 
 // Use for command line option '-Dgen=n', overrides 'part'
 // 0-7+ - generate parts individually in assembled positions. Combine with MeshLab.
@@ -44,7 +44,9 @@ wall_ = 3.1; //[0:0.1:20]
 wall = scl*wall_;
 
 // Negative - tinkercad import will fill in hollow shapes (most unhelpful). This will also save a subtraction operation ie. This will give us the shape to subtract from the art cube directly.
-Negative = 1;				// [1:No, 0.5:Yes, 0:Half]
+Negative = 0;				// [1:Yes, 0:No]
+// omit features for maze preview
+draft = 1; // [1:Yes, 0:No]
 
 // Shaft diameter
 shaft_d_ = 6; //[0:0.1:25]
@@ -119,20 +121,28 @@ fin=outer_d/2+6*scl;
 // travel of inner slider
 tra=core_h/2-2.5*scl-2*layer_h;
 of=7.5*scl+2*layer_h; // initial offset, once engaged
-st=(tra-of)/3;
+st=(tra-of)/3; // translate step
+sr=40; // rotate step
 
 // (translate,rotate) start, finish, steps, power
 // it, ir1, ir2, t, r1, r2, s, pt, pr1, pr2
 maze=[
-    [0,0,0,of,40,0,10,1,1,1],
-    [of,40,0,of+st,40,40,10,1,1,1],
-    [of+st,40,40,of+2*st,80,40,10,1,1,1],
-    [of+2*st,80,40,of+3*st,80,80,10,1,1,1],
-    [of+3*st,80,80,of+2*st,120,80,10,1,1,1],
-    [of+2*st,120,80,of+st,120,120,10,1,1,1],
-    [of+st,120,120,of,160,120,10,1,1,1],
-    [of,160,120,of+st,160,160,10,1,1,1],
-    [of+st,160,160,of+2*st,200,160,10,1,1,1],
+    [0,0,0,of,sr,0,10,1,1,1],
+    [of,sr,0,of+st,sr,sr,10,1,1,1],
+    [of+st,sr,sr,of+2*st,2*sr,sr,10,1,1,1],
+        [of+2*st,2*sr,sr,of+3*st,2*sr,0.375*sr,10,3,1,1], // top trap
+    [of+2*st,2*sr,sr,of+3*st,2*sr,2*sr,10,1,1,1],
+        [of+3*st,2*sr,2*sr,of+3*st,sr,2*sr,10,1,1,1], // bottom trap
+    [of+3*st,2*sr,2*sr,of+2*st,3*sr,2*sr,10,1,1,1],
+    [of+2*st,3*sr,2*sr,of+st,3*sr,3*sr,10,1,1,1],
+        [of+st,3*sr,3*sr,of+st,2.5*sr,3*sr,10,1,1,1], // bottom trap
+        [of+st,2.5*sr,3*sr,of,1.625*sr,3*sr,10,1,1,1], // bottom trap
+    [of+st,3*sr,3*sr,of,4*sr,3*sr,10,1,1,1],
+    [of,4*sr,3*sr,of+st,4*sr,4*sr,10,1,1,1],
+        [of,4*sr,3*sr,of,4*sr,1.625*sr,10,1,1,1], // top trap
+        [of,4*sr,1.625*sr,of+st,4*sr,1.625*sr,10,1,1,1],
+    [of+st,4*sr,4*sr,of+2*st,5*sr,4*sr,10,1,1,1],
+        [of+2*st,5*sr,4.5*sr,of+2*st,5*sr,3.5*sr,10,1,1,1], // top trap
 ];
 
 // Box
@@ -219,11 +229,14 @@ module lament(){
 }
 
 module lamenthalf(turns=false){
-    difference(){
+    if(draft){
+        translate([0,0,-cube_w/2+core_h2-5*scl])
+            cylinder(d=outer_d,h=5*scl-tol,$fn=96);
+    }else difference(){
         union(){
             translate([0,0,-cube_w/2])
                 cylinder(d=outer_d,h=core_h2-tol,$fn=96);
-            for (i=[0:2:15]){
+            for(i=[0:2:15]){
                 difference(){
                     intersection(){
                         cube(cube_w,center=true);
@@ -277,7 +290,7 @@ if(false||g==1||g==undef&&part=="core"){
     difference(){
         // positive volume
         union(){
-            mir()intersection(){
+            if(!draft)mir()intersection(){
                 r=(outer_d+outer_w/sqrt(2))/2+2*tol;
                 r1=outer_d/2;
                 h=core_h+core_h2-2*scl-cube_w/2;
@@ -300,7 +313,7 @@ if(false||g==1||g==undef&&part=="core"){
         }
         // negative volume
         // spinning fins
-        rotate_extrude(convexity=5)
+        if(!draft)rotate_extrude(convexity=5)
             polygon(points=[[outer_d/2+2*scl,core_h/2-2*scl+layer_h],[outer_d/2,core_h/2-2*scl+layer_h],[outer_d/2-2*scl,core_h/2-2*scl-2*scl/sqrt(3)+layer_h],[outer_d/2-2*scl,2*scl/sqrt(3)+2*scl-layer_h],[outer_d/2,2*scl-layer_h],[outer_d/2+2*scl,2*scl-layer_h],[outer_d/2+2*scl,2*scl-2*layer_h],[outer_d/2-tol,2*scl-2*layer_h],[outer_d/2-2*scl-2*tol,2*scl/sqrt(3)+2*scl-layer_h],[outer_d/2-2*scl-2*tol,core_h/2-2*scl-2*scl/sqrt(3)+layer_h],[outer_d/2-tol,core_h/2-2*scl+2*layer_h],[outer_d/2+2*scl,core_h/2-2*scl+2*layer_h]]);
         // slider tracks
         translate([0,0,-core_h/2])intersection(){
@@ -316,7 +329,7 @@ if(false||g==1||g==undef&&part=="core"){
             cylinder(r=outer_d/2-5*scl,h=core_h+AT);
         // tapered bottom
         translate([0,0,-core_h/2])rotate_extrude()scale([1,3/4,1]){
-            translate([outer_d/2-2.5*scl+tol+AT,0*layer_h*4/3,0])rotate(-45)square(3.5*scl);
+            if(!draft)translate([outer_d/2-2.5*scl+tol+AT,0*layer_h*4/3,0])rotate(-45)square(3.5*scl);
             translate([outer_d/2-2.5*scl-tol,0*layer_h*4/3,0])rotate(-180-45)square(3.5*scl);
             //translate([outer_d/2-2.5*scl+tol+AT,0,0])square(layer_h*4/3); // Too much
             //translate([outer_d/2-2.5*scl-tol,0,0])rotate(90)square(layer_h*4/3);
