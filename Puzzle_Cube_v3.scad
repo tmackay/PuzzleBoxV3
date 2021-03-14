@@ -122,7 +122,7 @@ fin=outer_d/2+6*scl;
 tra=core_h/2-2.5*scl-2*layer_h;
 of=7.5*scl+2*layer_h; // initial offset, once engaged
 st=(tra-of)/3; // translate step
-sr= 360/pegs/5;  // rotate step
+sr= 360/pegs/4.5;  // rotate step
 
 // (translate,rotate) start, finish, steps, power
 // it, ir1, ir2, t, r1, r2, s, pt, pr1, pr2
