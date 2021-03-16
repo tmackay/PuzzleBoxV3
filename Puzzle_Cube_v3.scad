@@ -7,11 +7,9 @@
 part = "box"; // [box:Box,lower:Lower Half,upper:Upper Half,core:Core]
 
 // Use for command line option '-Dgen=n', overrides 'part'
-// 0-7+ - generate parts individually in assembled positions. Combine with MeshLab.
+// 0-n - generate parts individually in assembled positions. Combine with MeshLab.
 // 0 box
-// 1 ring gears and jaws
-// 2 sun gear and knob
-// 3+ planet gears
+// 1 core
 gen=undef;
 
 // Overall scale (to avoid small numbers, internal faces or non-manifold edges)
@@ -29,12 +27,6 @@ core_h2 = (cube_w-core_h)/2;
 // Pegs to navigate labyrinth
 pegs=2;
 
-// Height of planetary layers (layer_h will be subtracted from gears>0). Non-uniform heights will reveal bugs.
-//gh_ = 8*[1, 1, 1, 1, 1, 1];
-//gh = scl*gh_;
-// Modules, planetary layers
-//modules = len(gh); //[2:1:3]
-
 // Outer diameter of core
 outer_d_ = 40.5; //[30:0.2:300]
 // +9/2
@@ -44,9 +36,9 @@ wall_ = 3.1; //[0:0.1:20]
 wall = scl*wall_;
 
 // Negative - tinkercad import will fill in hollow shapes (most unhelpful). This will also save a subtraction operation ie. This will give us the shape to subtract from the art cube directly.
-Negative = 0;				// [1:Yes, 0:No]
+Negative = 1;				// [1:Yes, 0:No]
 // omit features for maze preview
-draft = 1; // [1:Yes, 0:No]
+draft = 0; // [1:Yes, 0:No]
 
 // Shaft diameter
 shaft_d_ = 6; //[0:0.1:25]
@@ -136,7 +128,7 @@ maze=[
     [of+3*st,2*sr,2*sr,of+2*st,3*sr,2*sr,10,1,1,1],
     [of+2*st,3*sr,2*sr,of+st,3*sr,3*sr,10,1,1,1],
         [of+st,3*sr,3*sr,of+st,2.5*sr,3*sr,10,1,1,1], // bottom trap
-        [of+st,2.5*sr,3*sr,of,1.625*sr,3*sr,10,1,1,1], // bottom trap
+        [of+st,2.5*sr,3*sr,of,1.625*sr,3*sr,10,1,1,1],
     [of+st,3*sr,3*sr,of,4*sr,3*sr,10,1,1,1],
     [of,4*sr,3*sr,of+st,4*sr,4*sr,10,1,1,1],
         [of,4*sr,3*sr,of,4*sr,1.625*sr,10,1,1,1], // top trap
@@ -156,16 +148,21 @@ module lament(){
         lamenthalf(turns=true)children();
         // central shaft
         difference(){
-            translate([0,0,core_h2-cube_w/2-layer_h-AT])
-                cylinder(r=outer_d/2-7*scl-4*tol,h=core_h/2+2.5*scl+layer_h+AT);
+            union(){
+                translate([0,0,core_h2-cube_w/2-layer_h-AT])
+                    cylinder(r=outer_d/2-7*scl-4*tol,h=core_h/2+2.5*scl+layer_h+AT);
+                    // post
+                    translate([0,0,2.5*scl-TT])cylinder(r=outer_d/2-11*scl-10*tol,h=10*scl+AT);
+            }
             // maze path
             for(j=[0:pegs-1],k=[0:1],l=[0:len(maze)-1])
                 path(maze[l][0],maze[l][1],maze[l][3],maze[l][4],maze[l][6],maze[l][7],maze[l][9])rotate(j*360/pegs)
                     translate([outer_d/2-7*scl-4*tol+AT,0,k?-layer_h:2.5*scl+layer_h-core_h/2])
                         mirror([1,0,1])cylinder(r1=2.5*scl,r2=0.5*scl,h=2*scl+AT,$fn=24);
+            // payload
+            translate([0,0,core_h2-cube_w/2-layer_h-ST])
+                cylinder(r=outer_d/2-13*scl-10*tol,h=core_h);
         }
-        // post
-        translate([0,0,2.5*scl-TT])cylinder(r=outer_d/2-11*scl-10*tol,h=10*scl+AT);
         // key
         translate([0,0,6.5*scl-layer_h])intersection(){
             rotate_extrude(convexity=5)
@@ -224,14 +221,28 @@ module lament(){
                 //translate([outer_d/2-9*scl-5*tol+AT,0,0])square(layer_h*4/3); // Too much
                 //translate([outer_d/2-9*scl-7*tol,0,0])rotate(90)square(layer_h*4/3);
             }
+            // payload
+            translate([0,0,core_h2-cube_w/2-layer_h-ST])
+                cylinder(r=outer_d/2-13*scl-10*tol,h=core_h+2*layer_h+2*ST);
+            // overhang
+            translate([0,0,12.5*scl+2*tol])
+                cylinder(r1=outer_d/2-11*scl-8*tol,r2=outer_d/2-13*scl-10*tol,h=2*scl);            
         }
+
     }
 }
 
 module lamenthalf(turns=false){
     if(draft){
         translate([0,0,-cube_w/2+core_h2-5*scl])
-            cylinder(d=outer_d,h=5*scl-tol,$fn=96);
+            difference(){
+                cylinder(d=outer_d-4*scl,h=5*scl-tol,$fn=96);
+                // Finger holes (hint)
+                for(i=[0:8])rotate(i*360/9)translate([outer_d/2-scl,0,-TT])
+                    cylinder(d1=6*scl,d2=2*scl,h=5*scl-tol+AT,$fn=24);
+                // payload
+                translate([0,0,2*scl])cylinder(r=outer_d/2-13*scl-10*tol,h=3*scl-tol+AT);
+            }
     }else difference(){
         union(){
             translate([0,0,-cube_w/2])
@@ -253,6 +264,8 @@ module lamenthalf(turns=false){
                 }
             }
         }
+        // payload
+            //translate([0,0,2*scl])cylinder(r=outer_d/2-13*scl-10*tol,h=3*scl-tol+AT);
         // Dial spool track
         // TODO: parameterise dial diameter and hard coded offsets, scope global variables
         translate([0,0,-cube_w/2])rotate_extrude()
@@ -309,7 +322,7 @@ if(false||g==1||g==undef&&part=="core"){
                 }
             }
             translate([0,0,core_h2-cube_w/2])
-                cylinder(r=outer_d/2,h=core_h);
+                cylinder(r=outer_d/2-(draft?2*scl:0),h=core_h);
         }
         // negative volume
         // spinning fins
@@ -318,7 +331,7 @@ if(false||g==1||g==undef&&part=="core"){
         // slider tracks
         translate([0,0,-core_h/2])intersection(){
             rotate_extrude(convexity=5)
-                polygon(points=[[outer_d/2-7*scl,4*scl+tra+2*scl],[outer_d/2-5*scl,4*scl+tra+2*scl],[outer_d/2-3*scl,4*scl+tra+2*scl-2*scl/sqrt(3)],[outer_d/2-3*scl,0],[outer_d/2-7*scl,0]]);
+                polygon(points=[[outer_d/2-7*scl,4*scl+tra+2*scl],[outer_d/2-5*scl,4*scl+tra+2*scl],[outer_d/2-3*scl,4*scl+tra+2*scl-2*scl/sqrt(3)],[outer_d/2-3*scl,draft?2*scl/sqrt(3)+2*scl:0],[outer_d/2-5*scl,draft?2*scl:0],[outer_d/2-7*scl,draft?2*scl:0]]);
             for(j = [1:8]){
                 rotate(j*360/8+360/16+360/32)
                     translate([0,-2*scl-2*tol,0])cube([outer_d/2,4*scl+4*tol,core_h]);
