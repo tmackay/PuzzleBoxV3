@@ -36,7 +36,7 @@ wall_ = 3.1; //[0:0.1:20]
 wall = scl*wall_;
 
 // Negative - tinkercad import will fill in hollow shapes (most unhelpful). This will also save a subtraction operation ie. This will give us the shape to subtract from the art cube directly.
-Negative = 1;				// [1:Yes, 0:No]
+Negative = 0;				// [1:Yes, 0:No]
 // omit features for maze preview
 draft = 0; // [1:Yes, 0:No]
 
@@ -102,7 +102,7 @@ AT=scl/64;
 ST=AT*2;
 TT=AT/2;
 
-r=1*scl+outer_d/2-4*tol;
+r=outer_d/2+2*tol;
 h=core_h2;
 d=h/4;
 
@@ -265,7 +265,7 @@ module lamenthalf(turns=false){
             }
         }
         // payload
-            //translate([0,0,2*scl])cylinder(r=outer_d/2-13*scl-10*tol,h=3*scl-tol+AT);
+        translate([0,0,2*scl-cube_w/2])cylinder(r=outer_d/2-13*scl-10*tol,h=core_h2);
         // Dial spool track
         // TODO: parameterise dial diameter and hard coded offsets, scope global variables
         translate([0,0,-cube_w/2])rotate_extrude()
