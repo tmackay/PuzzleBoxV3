@@ -4,7 +4,7 @@
 // Licensed under a Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0) license, http://creativecommons.org/licenses/by-sa/4.0.
 
 // Which one would you like to see?
-part = "box"; // [box:Box,lower:Lower Half,upper:Upper Half,core:Core]
+part = "all"; // [all:All,box:Box,lower:Lower Half,upper:Upper Half,core:Core]
 
 // Use for command line option '-Dgen=n', overrides 'part'
 // 0-n - generate parts individually in assembled positions. Combine with MeshLab.
@@ -138,13 +138,13 @@ maze=[
 ];
 
 // Box
-if(g==0||g==undef&&(part=="box"||part=="lower"||part=="upper"))difference(){
+if(g==0||g==undef&&(part=="box"||part=="lower"||part=="upper"||part=="all"))difference(){
     if(Negative)cube(cube_w,center=true);
     lament();
 }
 
 module lament(){
-    if(g==0||part=="box"||part=="lower"){
+    if(g==0||part=="box"||part=="lower"||part=="all"){
         lamenthalf(turns=true)children();
         // central shaft
         difference(){
@@ -179,7 +179,7 @@ module lament(){
             }
         }
     }
-    if(g==0||part=="box"||part=="upper"){
+    if(g==0||part=="box"||part=="upper"||part=="all"){
         mirror([0,0,1])mirror([0,1,0])lamenthalf()mirror([0,0,1])mirror([0,1,0])children();
         // central shaft
         rotate(180)difference(){
@@ -299,7 +299,7 @@ module lamenthalf(turns=false){
 }
 
 // Core
-if(false||g==1||g==undef&&part=="core"){
+if(g==1||g==undef&&part=="core"||g==undef&&part=="all"){
     difference(){
         // positive volume
         union(){
@@ -348,10 +348,7 @@ if(false||g==1||g==undef&&part=="core"){
             //translate([outer_d/2-2.5*scl-tol,0,0])rotate(90)square(layer_h*4/3);
         }
     }
-}
-
-// Inner slider
-if(false||g==1||g==undef&&part=="core"){
+    // Inner slider
     translate([0,0,core_h2-cube_w/2])difference(){
         cylinder(r=outer_d/2-5*scl-2*tol,h=core_h/2+2.5*scl);
         translate([0,0,-TT])cylinder(r=outer_d/2-7*scl-2*tol,h=core_h/2+2.5*scl+AT);
